@@ -88,7 +88,7 @@ type
     pkRGBA
   Pixel = object
     case kind: PixelKind
-    of pkBW: bw_val: uint8
+    of pkBW: bw_val: tuple[a: uint8]
     of pkRGB: rgb_val: tuple[r, g, b: uint8]
     of pkRGBA: rgba_val: tuple[r, g, b, a: uint8]
   Image* = ref object
@@ -132,7 +132,7 @@ proc ImageNew(): Image =
   result.top_right = 0b1 shl 4 or 0b1 shl 5
 
   # Default values
-  result.first_pixel = result.top_left
+  result.header.image_descriptor = result.top_left.uint8
 
 
 proc load*(self: var Image, file_name: string) =
@@ -143,8 +143,7 @@ proc load*(self: var Image, file_name: string) =
   proc parse_pixel(self: var Image, fs: var FileStream): Pixel =
     if self.header.image_type.int in [3, 11]:
       let val = fs.readInt8().to_int
-      # echo val
-      result = Pixel(kind: pkBW, bw_val: val)
+      result = Pixel(kind: pkBW, bw_val: (a: val))
     elif self.header.image_type.int in [2, 10]:
       case self.header.pixel_depth
       of 16:
@@ -209,46 +208,45 @@ proc load*(self: var Image, file_name: string) =
         self.pixels[row].add(self.parse_pixel(fs))
   # compressed
   elif self.header.image_type.int in [10, 11]:
-    # echo "compressed"
     let
-      tot_pixels = self.header.image_height * self.header.image_width
+      tot_pixels = self.header.image_height.int * self.header.image_width.int
     var
       pixel_count = 0
       row = 0
+    self.pixels.add(@[])
     while pixel_count <= tot_pixels.int:
-      if self.pixels[row].high >= self.header.image_width.int:
+      if self.pixels[row].len >= self.header.image_width.int:
+        if pixel_count == tot_pixels.int:
+          break
         self.pixels.add(@[])
         inc(row)
       let repetition_count = fs.readInt8()
       let RLE: bool = (repetition_count and 0b10000000) shr 7 == 1
       let count: int = (repetition_count and 0b01111111).int + 1
       pixel_count += count
-      # echo pixel_count
       if RLE:
         let pixel = self.parse_pixel(fs)
-        for num in 0 .. count:
+        for num in 0 .. count - 1:
           self.pixels[row].add(pixel)
       else:
-        for num in 0 .. count:
+        for num in 0 .. count - 1:
           self.pixels[row].add(self.parse_pixel(fs))
 
 template write_value[T](f: var File, data: T) =
   var tmp: T
   shallowCopy(tmp, data)
   let sz = sizeof(tmp)
-  echo "v: $# size: $#" % [$tmp, $sz]
   assert sz == f.writeBuffer(addr(tmp), sz)
 
-proc write_data(f: var File, data: string) =
+template write_data(f: var File, data: string) =
   for str in data:
     f.write_value(str)
 
-# proc write_pixel(f: var File, pixel: Pixel) =
-#   if pixel.kind == pkBW:
-#     f.write_value(pixel.bw_val)
-#   else:
-#     for e in pixel.t:
-#       f.write_value(e.uint8)
+template write_pixel(f: var File, pixel: Pixel) =
+  for name, value in pixel.fieldPairs:
+    when name != "kind":
+      for v in value.fields:
+        f.write_value(v)
 
 proc write_header(f: var File, image: Image) =
   f.write_value(image.header.id_length)
@@ -272,8 +270,6 @@ proc write_footer(f: var File, image: Image) =
   f.write_data(image.footer.eend)
 
 proc save*(self: var Image, filename: string, compress=false, force_16_bit=false) =
-  # echo self.pixels[0].len
-  # echo self.pixels.len
   # ID LENGTH
   self.header.id_length = 0
   # COLOR MAP TYPE
@@ -287,7 +283,6 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
   self.header.y_origin = 0
   self.header.image_width = self.pixels[0].len.uint16
   self.header.image_height = self.pixels.len.uint16
-  self.header.image_descriptor = 0b0.uint8 or self.first_pixel.uint8
 
   # IMAGE TYPE
   # IMAGE SPECIFICATION (pixel_depht)
@@ -323,26 +318,17 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
     for row in self.pixels:
       for pixel in row:
         case self.header.image_type
-        # of 3: f.write_data(pixel)
+        of 3: f.write_pixel(pixel)
         of 2:
           case self.header.pixel_depth
           of 16: discard
-          of 24: discard
-          of 32: discard
+          of 24, 32: f.write_pixel(pixel)
           else: raise newException(ValueError, "invalid pixel depth")
         else: raise newException(ValueError, "invalid pixel kind")
-        # if self._header.image_type == 3:
-        # elif self._header.image_type == 2:
-        #   if self._header.pixel_depht == 16:
-        #     image_file.write(gen_pixel_rgb_16(*pixel))
-        #   elif self._header.pixel_depht == 24:
-        #     image_file.write(gen_pixel_rgba(*pixel))
-        #   elif self._header.pixel_depht == 32:
-        #     image_file.write(gen_pixel_rgba(*pixel))
 
   f.write_footer(self)
 
-# var image = ImageNew()
-# image.load("image_bw.tga")
-# image.save("ceva")
-let my_tuple = tuple("A"=2, "B"=3)
+var image = ImageNew()
+image.load("african_head_diffuse.tga")
+echo(image.header)
+image.save("african_head")
