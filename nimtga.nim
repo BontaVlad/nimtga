@@ -1,5 +1,6 @@
 # this is a port of https://github.com/MircoT/pyTGA
-import streams, strutils, typetraits
+
+import streams, strutils, typetraits, colors
 
 
 type
@@ -118,22 +119,16 @@ proc get_rgb_from_16(data: int16): tuple[r, g, b: uint8] =
     result.g = c_g.uint8
     result.b = c_b.uint8
 
-proc ImageNew(): Image =
-  new(result)
-  result.header = Header()
-  result.footer = Footer()
-  result.pixels = @[]
-  result.new_tga_format = false
+proc toColor*(pixel: Pixel): Color =
+  discard
+  # case pixel.kind
+  # of pkBW: return
 
-  # Screen destination of first pixel
-  result.bottom_left = 0b0
-  result.bottom_right = 0b1 shl 4
-  result.top_left = 0b1 shl 5
-  result.top_right = 0b1 shl 4 or 0b1 shl 5
+proc setPixel*(self: var Image, x, y: int, value: Pixel) =
+  self.pixels[x][y] = value
 
-  # Default values
-  result.header.image_descriptor = result.top_left.uint8
-
+proc getPixel*(self: var Image, x, y: int): Pixel =
+  result = self.pixels[x][y]
 
 proc load*(self: var Image, file_name: string) =
 
@@ -232,6 +227,7 @@ proc load*(self: var Image, file_name: string) =
         for num in 0 .. count - 1:
           self.pixels[row].add(self.parse_pixel(fs))
 
+
 template write_value[T](f: var File, data: T) =
   var tmp: T
   shallowCopy(tmp, data)
@@ -268,6 +264,112 @@ proc write_footer(f: var File, image: Image) =
   f.write_data(image.footer.signature)
   f.write_data(image.footer.dot)
   f.write_data(image.footer.eend)
+
+iterator encode(row: varargs[Pixel]): tuple[rep_count, value: Pixel] =
+  #[
+    ##
+    # Run-length encoded (RLE) images comprise two types of data
+    # elements:Run-length Packets and Raw Packets.
+    #
+    # The first field (1 byte) of each packet is called the
+    # Repetition Count field. The second field is called the
+    # Pixel Value field. For Run-length Packets, the Pixel Value
+    # field contains a single pixel value. For Raw
+    # Packets, the field is a variable number of pixel values.
+    #
+    # The highest order bit of the Repetition Count indicates
+    # whether the packet is a Raw Packet or a Run-length
+    # Packet. If bit 7 of the Repetition Count is set to 1, then
+    # the packet is a Run-length Packet. If bit 7 is set to
+    # zero, then the packet is a Raw Packet.
+    #
+    # The lower 7 bits of the Repetition Count specify how many
+    # pixel values are represented by the packet. In
+    # the case of a Run-length packet, this count indicates how
+    # many successive pixels have the pixel value
+    # specified by the Pixel Value field. For Raw Packets, the
+    # Repetition Count specifies how many pixel values
+    # are actually contained in the next field. This 7 bit value
+    # is actually encoded as 1 less than the number of
+    # pixels in the packet (a value of 0 implies 1 pixel while a
+    # value of 0x7F implies 128 pixels).
+    #
+    # Run-length Packets should never encode pixels from more than
+    # one scan line. Even if the end of one scan
+    # line and the beginning of the next contain pixels of the same
+    # value, the two should be encoded as separate
+    # packets. In other words, Run-length Packets should not wrap
+    # from one line to another. This scheme allows
+    # software to create and use a scan line table for rapid, random
+    # access of individual lines. Scan line tables are
+    # discussed in further detail in the Extension Area section of
+    # this document.
+    #
+    #
+    # Pixel format data example:
+    #
+    # +=======================================+
+    # | Uncompressed pixel run                |
+    # +=========+=========+=========+=========+
+    # | Pixel 0 | Pixel 1 | Pixel 2 | Pixel 3 |
+    # +---------+---------+---------+---------+
+    # | 144     | 144     | 144     | 144     |
+    # +---------+---------+---------+---------+
+    #
+    # +==========================================+
+    # | Run-length Packet                        |
+    # +============================+=============+
+    # | Repetition Count           | Pixel Value |
+    # +----------------------------+-------------+
+    # | 1 bit |       7 bit        |             |
+    # +----------------------------|     144     |
+    # |   1   |  3 (num pixel - 1) |             |
+    # +----------------------------+-------------+
+    #
+    # +====================================================================================+
+    # | Raw Packet                                                                         |
+    # +============================+=============+=============+=============+=============+
+    # | Repetition Count           | Pixel Value | Pixel Value | Pixel Value | Pixel Value |
+    # +----------------------------+-------------+-------------+-------------+-------------+
+    # | 1 bit |       7 bit        |             |             |             |             |
+    # +----------------------------|     144     |     144     |     144     |     144     |
+    # |   0   |  3 (num pixel - 1) |             |             |             |             |
+    # +----------------------------+-------------+-------------+-------------+-------------+
+    #
+  ]#
+
+  ##
+  # States:
+  # - 0: init
+  # - 1: run-length packet
+  # - 2: raw packet
+  #
+  var
+    state = 0
+    index = 0
+    repetition_count = 0
+    pixel_value: Pixel
+
+  # while index <= row.high:
+  #   echo index
+  #   case state
+  #   of 0:
+  #     repetition_count = 0
+  #     if index == len(row) - 1:
+  #       pixel_value = row[index]
+  #       yield tuple(rep_count: repetition_count, value: pixel_value)
+  #   # elif row[index] == row[index + 1]:
+  #   #   repetition_count |= 0b10000000
+  #   #   pixel_value = row[index]
+  #   #   state = 1
+  #   # else:
+  #   #   pixel_value = [row[index]]
+  #   #   state = 2
+  #   #   index += 1
+
+  #   of 1: discard
+  #   of 2: discard
+  #   else: discard
 
 proc save*(self: var Image, filename: string, compress=false, force_16_bit=false) =
   # ID LENGTH
@@ -321,14 +423,69 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
         of 3: f.write_pixel(pixel)
         of 2:
           case self.header.pixel_depth
-          of 16: discard
+          of 16: raise newException(ValueError, "16 bites pixels not yet implemented")
           of 24, 32: f.write_pixel(pixel)
           else: raise newException(ValueError, "invalid pixel depth")
         else: raise newException(ValueError, "invalid pixel kind")
+  # elif compress:
+  #   for row in self.pixels:
+  #     let (rep_count, value) = encode(row)
+# or repetition_count, pixel_value in self._encode(row):
+#                         image_file.write(gen_byte(repetition_count))
+#                         if repetition_count > 127:
+#                             if self._header.image_type == 11:
+#                                 image_file.write(gen_byte(pixel_value))
+#                             elif self._header.image_type == 10:
+#                                 if self._header.pixel_depht == 16:
+#                                     image_file.write(
+#                                         gen_pixel_rgb_16(*pixel_value))
+#                                 elif self._header.pixel_depht == 24:
+#                                     image_file.write(
+#                                         gen_pixel_rgba(*pixel_value))
+#                                 elif self._header.pixel_depht == 32:
+#                                     image_file.write(
+#                                         gen_pixel_rgba(*pixel_value))
+#                         else:
+#                             for pixel in pixel_value:
+#                                 if self._header.image_type == 11:
+#                                     image_file.write(gen_byte(pixel))
+#                                 elif self._header.image_type == 10:
+#                                     if self._header.pixel_depht == 16:
+#                                         image_file.write(
+#                                             gen_pixel_rgb_16(*pixel))
+#                                     elif self._header.pixel_depht == 24:
+#                                         image_file.write(
+#                                             gen_pixel_rgba(*pixel))
+#                                     elif self._header.pixel_depht == 32:
+#                                         image_file.write(
+#                                             gen_pixel_rgba(*pixel))
 
   f.write_footer(self)
 
-var image = ImageNew()
-image.load("african_head_diffuse.tga")
+proc ImageNew(): Image =
+  new(result)
+  result.header = Header()
+  result.footer = Footer()
+  result.pixels = @[]
+  result.new_tga_format = false
+
+  # Screen destination of first pixel
+  result.bottom_left = 0b0
+  result.bottom_right = 0b1 shl 4
+  result.top_left = 0b1 shl 5
+  result.top_right = 0b1 shl 4 or 0b1 shl 5
+
+  # Default values
+  result.header.image_descriptor = result.top_left.uint8
+
+proc ImageNew(filename: string): Image =
+  result = ImageNew()
+  result.load(filename)
+
+proc ImageNew(data: seq[Pixel]): Image =
+  # TODO: implement creating data from points
+  result = ImageNew()
+
+var image = ImageNew("african_head_diffuse.tga")
 echo(image.header)
 image.save("african_head")
