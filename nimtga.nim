@@ -120,8 +120,11 @@ proc get_rgb_from_16(data: int16): tuple[r, g, b: uint8] =
     result.b = c_b.uint8
 
 proc toColor*(pixel: Pixel): Color =
+  # TODO: this is ugly as fuck
   case pixel.kind
   of pkBW: return rgb(pixel.bw_val.a.int, pixel.bw_val.a.int, pixel.bw_val.a.int)
+  of pkRGB: return rgb(pixel.rgb_val.r.int, pixel.rgb_val.g.int, pixel.rgb_val.b.int)
+  of pkRGBA: return rgb(pixel.rgba_val.r.int, pixel.rgba_val.g.int, pixel.rgba_val.b.int)
   else: discard
 
 proc setPixel*(self: var Image, x, y: int, value: Pixel) =
@@ -129,7 +132,6 @@ proc setPixel*(self: var Image, x, y: int, value: Pixel) =
 
 proc getPixel*(self: var Image, x, y: int): Pixel =
   result = self.pixels[x][y]
-
 
 proc load*(self: var Image, file_name: string) =
 
