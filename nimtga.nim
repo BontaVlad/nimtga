@@ -120,15 +120,16 @@ proc get_rgb_from_16(data: int16): tuple[r, g, b: uint8] =
     result.b = c_b.uint8
 
 proc toColor*(pixel: Pixel): Color =
-  discard
-  # case pixel.kind
-  # of pkBW: return
+  case pixel.kind
+  of pkBW: return rgb(pixel.bw_val.a.int, pixel.bw_val.a.int, pixel.bw_val.a.int)
+  else: discard
 
 proc setPixel*(self: var Image, x, y: int, value: Pixel) =
   self.pixels[x][y] = value
 
 proc getPixel*(self: var Image, x, y: int): Pixel =
   result = self.pixels[x][y]
+
 
 proc load*(self: var Image, file_name: string) =
 
@@ -370,7 +371,6 @@ iterator encode(row: varargs[Pixel]): tuple[rep_count, value: Pixel] =
   #   of 1: discard
   #   of 2: discard
   #   else: discard
-
 proc save*(self: var Image, filename: string, compress=false, force_16_bit=false) =
   # ID LENGTH
   self.header.id_length = 0
@@ -462,7 +462,7 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
 
   f.write_footer(self)
 
-proc ImageNew(): Image =
+proc ImageNew*(): Image =
   new(result)
   result.header = Header()
   result.footer = Footer()
@@ -478,14 +478,10 @@ proc ImageNew(): Image =
   # Default values
   result.header.image_descriptor = result.top_left.uint8
 
-proc ImageNew(filename: string): Image =
+proc ImageNew*(filename: string): Image =
   result = ImageNew()
   result.load(filename)
 
-proc ImageNew(data: seq[Pixel]): Image =
-  # TODO: implement creating data from points
-  result = ImageNew()
-
-var image = ImageNew("african_head_diffuse.tga")
-echo(image.header)
-image.save("african_head")
+# proc ImageNew*(data: seq[Pixel]): Image =
+#   # TODO: implement creating data from points
+#   result = ImageNew()
