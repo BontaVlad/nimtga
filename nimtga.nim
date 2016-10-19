@@ -103,6 +103,12 @@ type
     top_right: int
     pixels: seq[seq[Pixel]]
 
+proc height*(self: Image): int =
+  result = self.header.image_height.int
+
+proc width*(self: Image): int =
+  result = self.header.image_width.int
+
 proc get_rgb_from_16(data: int16): tuple[r, g, b: uint8] =
     #[
     Construct an RGB color from 16 bit of data.
@@ -128,10 +134,10 @@ proc toColor*(pixel: Pixel): Color =
   else: discard
 
 proc setPixel*(self: var Image, x, y: int, value: Pixel) =
-  self.pixels[x][y] = value
+  self.pixels[y][x] = value
 
 proc getPixel*(self: var Image, x, y: int): Pixel =
-  result = self.pixels[x][y]
+  result = self.pixels[y][x]
 
 proc load*(self: var Image, file_name: string) =
 
