@@ -1,6 +1,6 @@
 # this is a port of https://github.com/MircoT/pyTGA
 
-import streams, strutils, typetraits, colors
+import streams, strutils
 
 
 type
@@ -83,11 +83,11 @@ type
     extension_area_offset: uint32  # 4 bytes
     developer_directory_offset: uint32 # 4 bytes
     signature, dot, eend: string
-  PixelKind = enum
+  PixelKind* = enum
     pkBW,
     pkRGB,
     pkRGBA
-  Pixel = object
+  Pixel* = object
     case kind: PixelKind
     of pkBW: bw_val: tuple[a: uint8]
     of pkRGB: rgb_val: tuple[r, g, b: uint8]
@@ -125,13 +125,13 @@ proc get_rgb_from_16(data: int16): tuple[r, g, b: uint8] =
     result.g = c_g.uint8
     result.b = c_b.uint8
 
-proc toColor*(pixel: Pixel): Color =
-  # TODO: this is ugly as fuck
-  case pixel.kind
-  of pkBW: return rgb(pixel.bw_val.a.int, pixel.bw_val.a.int, pixel.bw_val.a.int)
-  of pkRGB: return rgb(pixel.rgb_val.r.int, pixel.rgb_val.g.int, pixel.rgb_val.b.int)
-  of pkRGBA: return rgb(pixel.rgba_val.r.int, pixel.rgba_val.g.int, pixel.rgba_val.b.int)
-  else: discard
+# proc toColor*(pixel: Pixel): Color =
+#   # TODO: this is ugly as fuck
+#   case pixel.kind
+#   of pkBW: return rgb(pixel.bw_val.a.int, pixel.bw_val.a.int, pixel.bw_val.a.int)
+#   of pkRGB: return rgb(pixel.rgb_val.r.int, pixel.rgb_val.g.int, pixel.rgb_val.b.int)
+#   of pkRGBA: return rgb(pixel.rgba_val.r.int, pixel.rgba_val.g.int, pixel.rgba_val.b.int)
+#   else: discard
 
 proc setPixel*(self: var Image, x, y: int, value: Pixel) =
   self.pixels[y][x] = value
@@ -274,111 +274,111 @@ proc write_footer(f: var File, image: Image) =
   f.write_data(image.footer.dot)
   f.write_data(image.footer.eend)
 
-iterator encode(row: varargs[Pixel]): tuple[rep_count, value: Pixel] =
-  #[
-    ##
-    # Run-length encoded (RLE) images comprise two types of data
-    # elements:Run-length Packets and Raw Packets.
-    #
-    # The first field (1 byte) of each packet is called the
-    # Repetition Count field. The second field is called the
-    # Pixel Value field. For Run-length Packets, the Pixel Value
-    # field contains a single pixel value. For Raw
-    # Packets, the field is a variable number of pixel values.
-    #
-    # The highest order bit of the Repetition Count indicates
-    # whether the packet is a Raw Packet or a Run-length
-    # Packet. If bit 7 of the Repetition Count is set to 1, then
-    # the packet is a Run-length Packet. If bit 7 is set to
-    # zero, then the packet is a Raw Packet.
-    #
-    # The lower 7 bits of the Repetition Count specify how many
-    # pixel values are represented by the packet. In
-    # the case of a Run-length packet, this count indicates how
-    # many successive pixels have the pixel value
-    # specified by the Pixel Value field. For Raw Packets, the
-    # Repetition Count specifies how many pixel values
-    # are actually contained in the next field. This 7 bit value
-    # is actually encoded as 1 less than the number of
-    # pixels in the packet (a value of 0 implies 1 pixel while a
-    # value of 0x7F implies 128 pixels).
-    #
-    # Run-length Packets should never encode pixels from more than
-    # one scan line. Even if the end of one scan
-    # line and the beginning of the next contain pixels of the same
-    # value, the two should be encoded as separate
-    # packets. In other words, Run-length Packets should not wrap
-    # from one line to another. This scheme allows
-    # software to create and use a scan line table for rapid, random
-    # access of individual lines. Scan line tables are
-    # discussed in further detail in the Extension Area section of
-    # this document.
-    #
-    #
-    # Pixel format data example:
-    #
-    # +=======================================+
-    # | Uncompressed pixel run                |
-    # +=========+=========+=========+=========+
-    # | Pixel 0 | Pixel 1 | Pixel 2 | Pixel 3 |
-    # +---------+---------+---------+---------+
-    # | 144     | 144     | 144     | 144     |
-    # +---------+---------+---------+---------+
-    #
-    # +==========================================+
-    # | Run-length Packet                        |
-    # +============================+=============+
-    # | Repetition Count           | Pixel Value |
-    # +----------------------------+-------------+
-    # | 1 bit |       7 bit        |             |
-    # +----------------------------|     144     |
-    # |   1   |  3 (num pixel - 1) |             |
-    # +----------------------------+-------------+
-    #
-    # +====================================================================================+
-    # | Raw Packet                                                                         |
-    # +============================+=============+=============+=============+=============+
-    # | Repetition Count           | Pixel Value | Pixel Value | Pixel Value | Pixel Value |
-    # +----------------------------+-------------+-------------+-------------+-------------+
-    # | 1 bit |       7 bit        |             |             |             |             |
-    # +----------------------------|     144     |     144     |     144     |     144     |
-    # |   0   |  3 (num pixel - 1) |             |             |             |             |
-    # +----------------------------+-------------+-------------+-------------+-------------+
-    #
-  ]#
+# iterator encode(row: varargs[Pixel]): tuple[rep_count, value: Pixel] =
+#   #[
+#     ##
+#     # Run-length encoded (RLE) images comprise two types of data
+#     # elements:Run-length Packets and Raw Packets.
+#     #
+#     # The first field (1 byte) of each packet is called the
+#     # Repetition Count field. The second field is called the
+#     # Pixel Value field. For Run-length Packets, the Pixel Value
+#     # field contains a single pixel value. For Raw
+#     # Packets, the field is a variable number of pixel values.
+#     #
+#     # The highest order bit of the Repetition Count indicates
+#     # whether the packet is a Raw Packet or a Run-length
+#     # Packet. If bit 7 of the Repetition Count is set to 1, then
+#     # the packet is a Run-length Packet. If bit 7 is set to
+#     # zero, then the packet is a Raw Packet.
+#     #
+#     # The lower 7 bits of the Repetition Count specify how many
+#     # pixel values are represented by the packet. In
+#     # the case of a Run-length packet, this count indicates how
+#     # many successive pixels have the pixel value
+#     # specified by the Pixel Value field. For Raw Packets, the
+#     # Repetition Count specifies how many pixel values
+#     # are actually contained in the next field. This 7 bit value
+#     # is actually encoded as 1 less than the number of
+#     # pixels in the packet (a value of 0 implies 1 pixel while a
+#     # value of 0x7F implies 128 pixels).
+#     #
+#     # Run-length Packets should never encode pixels from more than
+#     # one scan line. Even if the end of one scan
+#     # line and the beginning of the next contain pixels of the same
+#     # value, the two should be encoded as separate
+#     # packets. In other words, Run-length Packets should not wrap
+#     # from one line to another. This scheme allows
+#     # software to create and use a scan line table for rapid, random
+#     # access of individual lines. Scan line tables are
+#     # discussed in further detail in the Extension Area section of
+#     # this document.
+#     #
+#     #
+#     # Pixel format data example:
+#     #
+#     # +=======================================+
+#     # | Uncompressed pixel run                |
+#     # +=========+=========+=========+=========+
+#     # | Pixel 0 | Pixel 1 | Pixel 2 | Pixel 3 |
+#     # +---------+---------+---------+---------+
+#     # | 144     | 144     | 144     | 144     |
+#     # +---------+---------+---------+---------+
+#     #
+#     # +==========================================+
+#     # | Run-length Packet                        |
+#     # +============================+=============+
+#     # | Repetition Count           | Pixel Value |
+#     # +----------------------------+-------------+
+#     # | 1 bit |       7 bit        |             |
+#     # +----------------------------|     144     |
+#     # |   1   |  3 (num pixel - 1) |             |
+#     # +----------------------------+-------------+
+#     #
+#     # +====================================================================================+
+#     # | Raw Packet                                                                         |
+#     # +============================+=============+=============+=============+=============+
+#     # | Repetition Count           | Pixel Value | Pixel Value | Pixel Value | Pixel Value |
+#     # +----------------------------+-------------+-------------+-------------+-------------+
+#     # | 1 bit |       7 bit        |             |             |             |             |
+#     # +----------------------------|     144     |     144     |     144     |     144     |
+#     # |   0   |  3 (num pixel - 1) |             |             |             |             |
+#     # +----------------------------+-------------+-------------+-------------+-------------+
+#     #
+#   ]#
 
-  ##
-  # States:
-  # - 0: init
-  # - 1: run-length packet
-  # - 2: raw packet
-  #
-  var
-    state = 0
-    index = 0
-    repetition_count = 0
-    pixel_value: Pixel
+#   ##
+#   # States:
+#   # - 0: init
+#   # - 1: run-length packet
+#   # - 2: raw packet
+#   #
+#   # var
+#   #   state = 0
+#   #   index = 0
+#   #   repetition_count = 0
+#   #   pixel_value: Pixel
 
-  # while index <= row.high:
-  #   echo index
-  #   case state
-  #   of 0:
-  #     repetition_count = 0
-  #     if index == len(row) - 1:
-  #       pixel_value = row[index]
-  #       yield tuple(rep_count: repetition_count, value: pixel_value)
-  #   # elif row[index] == row[index + 1]:
-  #   #   repetition_count |= 0b10000000
-  #   #   pixel_value = row[index]
-  #   #   state = 1
-  #   # else:
-  #   #   pixel_value = [row[index]]
-  #   #   state = 2
-  #   #   index += 1
+#   # while index <= row.high:
+#   #   echo index
+#   #   case state
+#   #   of 0:
+#   #     repetition_count = 0
+#   #     if index == len(row) - 1:
+#   #       pixel_value = row[index]
+#   #       yield tuple(rep_count: repetition_count, value: pixel_value)
+#   #   # elif row[index] == row[index + 1]:
+#   #   #   repetition_count |= 0b10000000
+#   #   #   pixel_value = row[index]
+#   #   #   state = 1
+#   #   # else:
+#   #   #   pixel_value = [row[index]]
+#   #   #   state = 2
+#   #   #   index += 1
 
-  #   of 1: discard
-  #   of 2: discard
-  #   else: discard
+#   #   of 1: discard
+#   #   of 2: discard
+#   #   else: discard
 proc save*(self: var Image, filename: string, compress=false, force_16_bit=false) =
   # ID LENGTH
   self.header.id_length = 0
@@ -418,7 +418,7 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
     of 2: self.header.image_type = 10
     else: discard
 
-  var f = open(filename & ".tga", fmWrite)
+  var f = open(filename, fmWrite)
   defer: f.close()
   if isNil(f):
     raise newException(IOError, "Failed to open/create file: $#" % filename)
@@ -470,7 +470,17 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
 
   f.write_footer(self)
 
-proc ImageNew*(): Image =
+
+proc newPixel* (data: tuple[r, g, b: range[0..255]]): Pixel =
+  # TODO: see the forums for a cleaner implementation
+  result.kind = pkRGB
+  var data_uint8: tuple[r, g, b: uint8]
+  data_uint8.r = data.r.uint8
+  data_uint8.g = data.g.uint8
+  data_uint8.b = data.b.uint8
+  result.rgb_val = data_uint8
+
+proc newImage*(): Image =
   new(result)
   result.header = Header()
   result.footer = Footer()
@@ -486,10 +496,10 @@ proc ImageNew*(): Image =
   # Default values
   result.header.image_descriptor = result.top_left.uint8
 
-proc ImageNew*(filename: string): Image =
-  result = ImageNew()
+proc newImage*(filename: string): Image =
+  result = newImage()
   result.load(filename)
 
-# proc ImageNew*(data: seq[Pixel]): Image =
-#   # TODO: implement creating data from points
-#   result = ImageNew()
+proc newImage*(data: seq[seq[Pixel]]): Image =
+  result = newImage()
+  result.pixels = data
