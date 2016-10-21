@@ -1,6 +1,6 @@
 # this is a port of https://github.com/MircoT/pyTGA
 
-import streams, strutils
+import streams, strutils, colors
 
 
 type
@@ -125,13 +125,13 @@ proc get_rgb_from_16(data: int16): tuple[r, g, b: uint8] =
     result.g = c_g.uint8
     result.b = c_b.uint8
 
-# proc toColor*(pixel: Pixel): Color =
-#   # TODO: this is ugly as fuck
-#   case pixel.kind
-#   of pkBW: return rgb(pixel.bw_val.a.int, pixel.bw_val.a.int, pixel.bw_val.a.int)
-#   of pkRGB: return rgb(pixel.rgb_val.r.int, pixel.rgb_val.g.int, pixel.rgb_val.b.int)
-#   of pkRGBA: return rgb(pixel.rgba_val.r.int, pixel.rgba_val.g.int, pixel.rgba_val.b.int)
-#   else: discard
+proc toColor*(pixel: Pixel): Color =
+  # TODO: this is ugly as fuck
+  case pixel.kind
+  of pkBW: return rgb(pixel.bw_val.a.int, pixel.bw_val.a.int, pixel.bw_val.a.int)
+  of pkRGB: return rgb(pixel.rgb_val.r.int, pixel.rgb_val.g.int, pixel.rgb_val.b.int)
+  of pkRGBA: return rgb(pixel.rgba_val.r.int, pixel.rgba_val.g.int, pixel.rgba_val.b.int)
+  else: discard
 
 proc setPixel*(self: var Image, x, y: int, value: Pixel) =
   self.pixels[y][x] = value
@@ -241,7 +241,8 @@ template write_value[T](f: var File, data: T) =
   var tmp: T
   shallowCopy(tmp, data)
   let sz = sizeof(tmp)
-  assert sz == f.writeBuffer(addr(tmp), sz)
+  let written_bytes = f.writeBuffer(addr(tmp), sz)
+  doAssert(sz == written_bytes, "Wrong number of bytes written")
 
 template write_data(f: var File, data: string) =
   for str in data:
@@ -419,9 +420,10 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
     else: discard
 
   var f = open(filename, fmWrite)
-  defer: f.close()
   if isNil(f):
     raise newException(IOError, "Failed to open/create file: $#" % filename)
+
+  defer: f.close()
 
   f.write_header(self)
   if not compress:
@@ -467,7 +469,6 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
 #                                     elif self._header.pixel_depht == 32:
 #                                         image_file.write(
 #                                             gen_pixel_rgba(*pixel))
-
   f.write_footer(self)
 
 
