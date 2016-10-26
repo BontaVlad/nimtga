@@ -92,7 +92,7 @@ type
     of pkBW: bw_val: tuple[a: uint8]
     of pkRGB: rgb_val: tuple[r, g, b: uint8]
     of pkRGBA: rgba_val: tuple[r, g, b, a: uint8]
-  EncodedPixel = tuple[rep_count: uint8, value: seq[Pixel]]
+  EncodedPixel = tuple[rep_count: uint8, value: Pixel]
   Image* = ref object
     header: Header
     footer: Footer
@@ -287,8 +287,7 @@ proc write_footer(f: var File, image: Image) =
   f.write_data(image.footer.dot)
   f.write_data(image.footer.eend)
 
-
-proc encode(row: seq[Pixel]): seq[EncodedPixel] =
+iterator encode(row: seq[Pixel]): EncodedPixel {.inline.}=
   #[
     ##
     # Run-length encoded (RLE) images comprise two types of data
@@ -361,53 +360,53 @@ proc encode(row: seq[Pixel]): seq[EncodedPixel] =
     #
   ]#
 
-#   ##
-#   # States:
-#   # - 0: init
-#   # - 1: run-length packet
-#   # - 2: raw packet
-#   #
+  ##
+  # States:
+  # - 0: init
+  # - 1: run-length packet
+  # - 2: raw packet
+  #
   var
     state = 0
     index = 0
     repetition_count: uint8 = 0
-    pixel_value: seq[Pixel] = @[]
+    pixel_value: Pixel
 
-  result = @[]
-
-  while index <= row.high:
-    # echo index
+  while index < row.high:
+    echo "index: " & $index
     if state == 0:
+      echo "state 0"
       repetition_count = 0
-      if index == len(row) - 1:
-        pixel_value.add(row[index])
-        result.add((repetition_count, pixel_value))
-      elif row[index] == row[index + 1]:
+      pixel_value = row[index]
+      if row[index] == row[index + 1]:
         repetition_count = repetition_count or 0b10000000
-        pixel_value.add(row[index])
         state = 1
       else:
-        pixel_value.add(row[index])
         state = 2
       inc(index)
-    elif state == 1 and row[index] == pixel_value[0]:
-      if (repetition_count and 0b1111111) == 127:
-        result.add((repetition_count, pixel_value))
-        repetition_count = 0b10000000
+
+    if state == 1:
+      echo "state 1"
+      if row[index] == pixel_value:
+        if (repetition_count and 0b1111111) == 127:
+          repetition_count = 0b10000000
+        else:
+          inc(repetition_count)
+          echo "repetition_count" & $repetition_count
+        inc(index)
       else:
-        inc(repetition_count)
-      inc(index)
-    elif state == 2 and row[index] != pixel_value[0]:
+        state = 0
+        yield (repetition_count, pixel_value)
+
+    if state == 2 and row[index] != pixel_value:
+      echo "state 2"
+      echo pixel_value
       if (repetition_count and 0b1111111) == 127:
-        result.add((repetition_count, pixel_value))
         repetition_count = 0
-        pixel_value.add(row[index])
+        yield (repetition_count, pixel_value)
       else:
         inc(repetition_count)
-        pixel_value.add(row[index])
-      inc(index)
-    else:
-      result.add((repetition_count, pixel_value))
+      yield (repetition_count, pixel_value)
       state = 0
 
 proc save*(self: var Image, filename: string, compress=false, force_16_bit=false) =
@@ -470,14 +469,12 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
   elif compress:
     for i, row in pairs(self.pixels):
       echo "row " & $i
-      for en_pixel in encode(row):
-        # echo "count: $# value: $#" % [$en_pixel.rep_count, $en_pixel.value]
-        f.write_value(en_pixel.rep_count)
-        if en_pixel.rep_count > 127.uint8:
-          f.write_pixel(en_pixel.value[0])
-        else:
-          for pixel in en_pixel.value:
-            f.write_pixel(pixel)
+      for count, value in encode(row):
+        echo "count: $# value: $#" % [$count, $value]
+        # if count > 127.uint8:
+        #   f.write_pixel(value)
+        # else:
+        #   f.write_pixel(value)
   f.write_footer(self)
 
 
@@ -516,7 +513,9 @@ proc newImage*(data: seq[seq[Pixel]]): Image =
 
 
 when isMainModule:
-  var image = newImage("african_head_diffuse.tga")
-  image.save("compressed_african_head.tga", compress=true)
+  # var image = newImage("african_head_diffuse.tga")
+  # image.save("compressed_african_head.tga", compress=true)
   # var image = newImage("image_bw.tga")
-  # image.save("compressed_image_bw.tga", compress=true)
+  # image.save("compressed_african_head.tga", compress=true)
+  var image = newImage("image_bw.tga")
+  image.save("compressed_image_bw.tga", compress=true)
