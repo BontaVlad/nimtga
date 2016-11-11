@@ -1,7 +1,7 @@
 # this is a port of https://github.com/MircoT/pyTGA
 
-import streams, strutils, colors
 
+import streams, strutils, colors
 
 type
   Header = object
@@ -62,47 +62,47 @@ type
     ]#
 
     # Field(1)
-    id_length: uint8
+    id_length*: uint8
     # Field(2)
-    color_map_type: uint8
+    color_map_type*: uint8
     # Field(3)
-    image_type: uint8
+    image_type*: uint8
     # Field(4)
-    first_entry_index: uint16
-    color_map_length: uint16
-    color_map_entry_size: uint8
+    first_entry_index*: uint16
+    color_map_length*: uint16
+    color_map_entry_size*: uint8
     # Field(5)
-    x_origin: uint16
-    y_origin: uint16
-    image_width: uint16
-    image_height: uint16
-    pixel_depth: uint8
-    image_descriptor: uint8
+    x_origin*: uint16
+    y_origin*: uint16
+    image_width*: uint16
+    image_height*: uint16
+    pixel_depth*: uint8
+    image_descriptor*: uint8
 
   Footer = object
-    extension_area_offset: uint32  # 4 bytes
-    developer_directory_offset: uint32 # 4 bytes
-    signature, dot, eend: string
+    extension_area_offset*: uint32  # 4 bytes
+    developer_directory_offset*: uint32 # 4 bytes
+    signature*, dot*, eend*: string
   PixelKind* = enum
     pkBW,
     pkRGB,
     pkRGBA
   Pixel* = object
-    case kind: PixelKind
-    of pkBW: bw_val: tuple[a: uint8]
-    of pkRGB: rgb_val: tuple[r, g, b: uint8]
-    of pkRGBA: rgba_val: tuple[r, g, b, a: uint8]
+    case kind*: PixelKind
+    of pkBW: bw_val*: tuple[a: uint8]
+    of pkRGB: rgb_val*: tuple[r, g, b: uint8]
+    of pkRGBA: rgba_val*: tuple[r, g, b, a: uint8]
   EncodedPixel = tuple[rep_count: uint8, value: Pixel]
   Image* = ref object
-    header: Header
-    footer: Footer
-    new_tga_format: bool
-    first_pixel: int
-    bottom_left: int
-    bottom_right: int
-    top_left: int
-    top_right: int
-    pixels: seq[seq[Pixel]]
+    header*: Header
+    footer*: Footer
+    new_tga_format*: bool
+    first_pixel*: int
+    bottom_left*: int
+    bottom_right*: int
+    top_left*: int
+    top_right*: int
+    pixels*: seq[seq[Pixel]]
 
 proc `==`*(a, b: Pixel): bool =
   if a.kind == b.kind:
@@ -373,9 +373,7 @@ iterator encode(row: seq[Pixel]): EncodedPixel {.inline.}=
     pixel_value: Pixel
 
   while index < row.high:
-    echo "index: " & $index
     if state == 0:
-      echo "state 0"
       repetition_count = 0
       pixel_value = row[index]
       if row[index] == row[index + 1]:
@@ -386,21 +384,17 @@ iterator encode(row: seq[Pixel]): EncodedPixel {.inline.}=
       inc(index)
 
     if state == 1:
-      echo "state 1"
       if row[index] == pixel_value:
         if (repetition_count and 0b1111111) == 127:
           repetition_count = 0b10000000
         else:
           inc(repetition_count)
-          echo "repetition_count" & $repetition_count
         inc(index)
       else:
         state = 0
         yield (repetition_count, pixel_value)
 
     if state == 2 and row[index] != pixel_value:
-      echo "state 2"
-      echo pixel_value
       if (repetition_count and 0b1111111) == 127:
         repetition_count = 0
         yield (repetition_count, pixel_value)
@@ -468,13 +462,11 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
         else: raise newException(ValueError, "invalid pixel kind")
   elif compress:
     for i, row in pairs(self.pixels):
-      echo "row " & $i
       for count, value in encode(row):
-        echo "count: $# value: $#" % [$count, $value]
-        # if count > 127.uint8:
-        #   f.write_pixel(value)
-        # else:
-        #   f.write_pixel(value)
+        if count > 127.uint8:
+          f.write_pixel(value)
+        else:
+          f.write_pixel(value)
   f.write_footer(self)
 
 
@@ -513,9 +505,9 @@ proc newImage*(data: seq[seq[Pixel]]): Image =
 
 
 when isMainModule:
-  # var image = newImage("african_head_diffuse.tga")
-  # image.save("compressed_african_head.tga", compress=true)
-  # var image = newImage("image_bw.tga")
-  # image.save("compressed_african_head.tga", compress=true)
-  var image = newImage("image_bw.tga")
-  image.save("compressed_image_bw.tga", compress=true)
+  var image = newImage("african_head_diffuse.tga")
+  image.save("compressed_african_head.tga")
+#   # var image = newImage("image_bw.tga")
+#   # image.save("compressed_african_head.tga", compress=true)
+#   # var image = newImage("image_bw.tga")
+#   # image.save("compressed_image_bw.tga", compress=true)
