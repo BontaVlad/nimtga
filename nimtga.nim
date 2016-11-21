@@ -1,10 +1,9 @@
 # this is a port of https://github.com/MircoT/pyTGA
 
 
-import streams, strutils, colors
-
+import streams, strutils, colors, sequtils, marshal
 type
-  Header = object
+  Header* = object
   #[
     Here we have some details for each field:
     Field(1)
@@ -79,7 +78,7 @@ type
     pixel_depth*: uint8
     image_descriptor*: uint8
 
-  Footer = object
+  Footer* = object
     extension_area_offset*: uint32  # 4 bytes
     developer_directory_offset*: uint32 # 4 bytes
     signature*, dot*, eend*: string
@@ -93,7 +92,7 @@ type
     of pkRGB: rgb_val*: tuple[r, g, b: uint8]
     of pkRGBA: rgba_val*: tuple[r, g, b, a: uint8]
   EncodedPixel = tuple[rep_count: uint8, value: Pixel]
-  Image* = ref object
+  Image* = object
     header*: Header
     footer*: Footer
     new_tga_format*: bool
@@ -102,7 +101,7 @@ type
     bottom_right*: int
     top_left*: int
     top_right*: int
-    pixels*: seq[seq[Pixel]]
+    pixels*: seq[Pixel]
 
 proc `==`*(a, b: Pixel): bool =
   if a.kind == b.kind:
@@ -113,7 +112,6 @@ proc `==`*(a, b: Pixel): bool =
     else: result = false
   else:
     result = false
-  # echo "$# and $# are equal = $#" % [$a, $b, $result]
 
 proc height*(self: Image): int =
   result = self.header.image_height.int
@@ -123,13 +121,13 @@ proc width*(self: Image): int =
 
 proc get_rgb_from_16(data: int16): tuple[r, g, b: uint8] =
     #[
-    Construct an RGB color from 16 bit of data.
-    Args:
-        second_byte (bytes): the first bytes read
-        first_byte (bytes): the second bytes read
-    Returns:
-        tuple(int, int, int): the RGB color
-    ]#
+#     Construct an RGB color from 16 bit of data.
+#     Args:
+#         second_byte (bytes): the first bytes read
+#         first_byte (bytes): the second bytes read
+#     Returns:
+#         tuple(int, int, int): the RGB color
+#     ]#
     let c_r = cast[uint8]((data and 0b1111100000000000) shr 11)
     let c_g = cast[uint8]((data and 0b0000011111000000) shr 6)
     let c_b = cast[uint8]((data and 0b111110) shr 1)
@@ -145,46 +143,83 @@ proc toColor*(pixel: Pixel): Color =
   of pkRGBA: return rgb(pixel.rgba_val.r.int, pixel.rgba_val.g.int, pixel.rgba_val.b.int)
   else: discard
 
-proc setPixel*(self: var Image, x, y: int, value: Pixel) =
-  self.pixels[y][x] = value
+proc newPixel* (r, g, b: range[0..255]): Pixel =
+  # TODO: see the forums for a cleaner implementation
+  result.kind = pkRGB
+  var data_uint8: tuple[r, g, b: uint8]
+  data_uint8.r = r.uint8
+  data_uint8.g = g.uint8
+  data_uint8.b = b.uint8
+  result.rgb_val = data_uint8
 
-proc getPixel*(self: var Image, x, y: int): Pixel =
-  result = self.pixels[y][x]
+proc `$`*(pixel: Pixel): string =
+  case pixel.kind
+  of pkBW: result = "bw: $#" % [$pixel.bw_val.a]
+  of pkRGB: result = "r: $#, g: $#, b: $#" % [$pixel.rgb_val.r, $pixel.rgb_val.g, $pixel.rgb_val.b]
+  of pkRGBA: result = "r: $#, g: $#, b: $#, alpha: $#" % [$pixel.rgba_val.r, $pixel.rgba_val.g, $pixel.rgba_val.b, $pixel.rgba_val.a]
+proc setPixel*(self: var Image, row, index: int, value: Pixel) =
+  try:
+    self.pixels[(self.header.image_width.int * row) + index] = value
+  except IndexError:
+    echo "self.pixels.len: " & $self.pixels.len
+    echo "row: " & $row
+    echo "col: " & $index
+    echo "index: " & $((self.header.image_width.int * row) + index)
 
-proc load*(self: var Image, file_name: string) =
+proc getPixel*(self: Image, row, index: int): Pixel =
+  result = self.pixels[(self.header.image_width.int * row) + index]
 
-  template to_int(expr: untyped): uint8 =
-    cast[uint8](expr).uint8
 
-  proc parse_pixel(self: var Image, fs: var FileStream): Pixel =
-    if self.header.image_type.int in [3, 11]:
-      let val = fs.readInt8().to_int
-      result = Pixel(kind: pkBW, bw_val: (a: val))
-    elif self.header.image_type.int in [2, 10]:
-      case self.header.pixel_depth
-      of 16:
-        result = Pixel(
-          kind: pkRGB,
-          rgb_val: get_rgb_from_16(fs.readInt16()))
-      of 24:
-        result = Pixel(
-          kind: pkRGB,
-          rgb_val: (fs.readInt8().to_int, fs.readInt8().to_int, fs.readInt8().to_int)
-        )
-      of 32:
-        result = Pixel(
-          kind: pkRGBA,
-          rgba_val: (fs.readInt8().to_int, fs.readInt8().to_int, fs.readInt8().to_int, fs.readInt8().to_int)
-        )
-      else: raise newException(ValueError, "unsupported image type")
+# TODO: this has rgb type hardcoded
+proc getPixelValue*(self: Image, index, val: int): uint8 {.inline.}=
+  let pixel = self.pixels[index]
+  case val
+  of 0: result = pixel.rgb_val.r
+  of 1: result = pixel.rgb_val.g
+  of 2: result = pixel.rgb_val.b
+  else: echo "invalid val: " & $val
 
+template to_int(expr: untyped): uint8 =
+  cast[uint8](expr).uint8
+
+proc parse_pixel(self: var Image, fs: FileStream): Pixel =
+  # echo "header from parse: " & repr(self.header)
+  # echo "fs: " & repr(fs)
+  # echo "try to read"
+  case self.header.image_type.int
+  of 3, 11:
+    let val = fs.readInt8().to_int
+    result = Pixel(kind: pkBW, bw_val: (a: val))
+  of 2, 10:
+    case self.header.pixel_depth
+    of 16:
+      # echo "px: 16"
+      result = Pixel(
+        kind: pkRGB,
+        rgb_val: get_rgb_from_16(fs.readInt16()))
+    of 24:
+      # echo "px: 24"
+      result = Pixel(
+        kind: pkRGB,
+        rgb_val: (fs.readInt8().to_int, fs.readInt8().to_int, fs.readInt8().to_int)
+      )
+    of 32:
+      # echo "px: 32"
+      result = Pixel(
+        kind: pkRGBA,
+        rgba_val: (fs.readInt8().to_int, fs.readInt8().to_int, fs.readInt8().to_int, fs.readInt8().to_int)
+      )
+    else: raise newException(ValueError, "unsupported pixel depth")
+  else: raise newException(ValueError, "unsupported image type")
+
+proc load(self: var Image, file_name: string) =
   var
     f: File
     fs: FileStream
   if not open(f, file_name, fmRead):
     raise newException(IOError, "Failed to open file: $#" % file_name)
 
-  fs = newFileStream(f)
+  fs = newFileStream(file_name)
   if isNil(fs):
     raise newException(IOError, "Failed to open file: $#" % file_name)
 
@@ -215,39 +250,43 @@ proc load*(self: var Image, file_name: string) =
   if self.footer.signature == "TRUEVISION-XFILE":
     self.new_tga_format = true
   fs.setPosition(original_position)
+  let tot_pixels = self.header.image_height.int * self.header.image_width.int
+  self.pixels = @[]
 
   # no compression
   if self.header.image_type.int in [2, 3]:
     for row in 0 .. self.header.image_height.int - 1:
-      self.pixels.add(@[])
       for col in 0 .. self.header.image_width.int - 1:
-        self.pixels[row].add(self.parse_pixel(fs))
+        self.setPixel(row, col, self.parse_pixel(fs))
   # compressed
   elif self.header.image_type.int in [10, 11]:
-    let
-      tot_pixels = self.header.image_height.int * self.header.image_width.int
     var
       pixel_count = 0
-      row = 0
-    self.pixels.add(@[])
-    while pixel_count <= tot_pixels.int:
-      if self.pixels[row].len >= self.header.image_width.int:
-        if pixel_count == tot_pixels.int:
-          break
-        self.pixels.add(@[])
-        inc(row)
+      # row = 0
+      # index = 0
+      pixel: Pixel
+    while pixel_count < tot_pixels:
+      # echo $pixel_count
+      # if new row
+      # echo "index: " & $index
+      # echo "row: " & $row
+      # if index >= self.header.image_width.int - 1:
+      #   index = 0
+      #   if pixel_count <= tot_pixels - self.header.image_width.int:
+      #     inc(row)
       let repetition_count = fs.readInt8()
       let RLE: bool = (repetition_count and 0b10000000) shr 7 == 1
       let count: int = (repetition_count and 0b01111111).int + 1
+      # echo "count: " & $count
       pixel_count += count
+
       if RLE:
-        let pixel = self.parse_pixel(fs)
+        pixel = self.parse_pixel(fs)
         for num in 0 .. count - 1:
-          self.pixels[row].add(pixel)
+          self.pixels.add(pixel)
       else:
         for num in 0 .. count - 1:
-          self.pixels[row].add(self.parse_pixel(fs))
-
+          self.pixels.add(self.parse_pixel(fs))
 
 template write_value[T](f: var File, data: T) =
   var tmp: T
@@ -415,12 +454,10 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
   # IMAGE SPECIFICATION
   self.header.x_origin = 0
   self.header.y_origin = 0
-  self.header.image_width = self.pixels[0].len.uint16
-  self.header.image_height = self.pixels.len.uint16
 
   # IMAGE TYPE
   # IMAGE SPECIFICATION (pixel_depht)
-  let tmp_pixel = self.pixels[0][0]
+  let tmp_pixel = self.pixels[0]
   case tmp_pixel.kind
   of pkBW:
     self.header.image_type = 3
@@ -450,40 +487,22 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
 
   f.write_header(self)
   if not compress:
-    for row in self.pixels:
-      for pixel in row:
-        case self.header.image_type
-        of 3: f.write_pixel(pixel)
-        of 2:
-          case self.header.pixel_depth
-          of 16: raise newException(ValueError, "16 bites pixels not yet implemented")
-          of 24, 32: f.write_pixel(pixel)
-          else: raise newException(ValueError, "invalid pixel depth")
-        else: raise newException(ValueError, "invalid pixel kind")
-  elif compress:
-    for i, row in pairs(self.pixels):
-      for count, value in encode(row):
-        if count > 127.uint8:
-          f.write_pixel(value)
-        else:
-          f.write_pixel(value)
+    for pixel in self.pixels:
+      f.write_pixel(pixel)
+  # elif compress:
+  #   for i, row in pairs(self.pixels):
+  #     for count, value in encode(row):
+  #       if count > 127.uint8:
+  #         f.write_pixel(value)
+  #       else:
+  #         f.write_pixel(value)
   f.write_footer(self)
 
 
-proc newPixel* (data: tuple[r, g, b: range[0..255]]): Pixel =
-  # TODO: see the forums for a cleaner implementation
-  result.kind = pkRGB
-  var data_uint8: tuple[r, g, b: uint8]
-  data_uint8.r = data.r.uint8
-  data_uint8.g = data.g.uint8
-  data_uint8.b = data.b.uint8
-  result.rgb_val = data_uint8
+proc newImageImpl(): Image =
 
-proc newImage*(): Image =
-  new(result)
   result.header = Header()
   result.footer = Footer()
-  result.pixels = @[]
   result.new_tga_format = false
 
   # Screen destination of first pixel
@@ -496,18 +515,18 @@ proc newImage*(): Image =
   result.header.image_descriptor = result.top_left.uint8
 
 proc newImage*(filename: string): Image =
-  result = newImage()
+  result = newImageImpl()
   result.load(filename)
 
-proc newImage*(data: seq[seq[Pixel]]): Image =
-  result = newImage()
-  result.pixels = data
+proc newImage*(header: Header, footer: Footer): Image =
+  result = newImageImpl()
+  result.header = header
+  result.footer = footer
+  let pixel_count = result.header.image_height.int * result.header.image_width.int
+  result.pixels = repeat(newPixel(0, 0, 0), pixel_count)
 
 
-when isMainModule:
+if isMainModule:
   var image = newImage("african_head_diffuse.tga")
-  image.save("compressed_african_head.tga")
-#   # var image = newImage("image_bw.tga")
-#   # image.save("compressed_african_head.tga", compress=true)
-#   # var image = newImage("image_bw.tga")
-#   # image.save("compressed_image_bw.tga", compress=true)
+  image.save("new_turtle.tga")
+
