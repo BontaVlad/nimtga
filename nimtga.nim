@@ -1,7 +1,7 @@
 # this is a port of https://github.com/MircoT/pyTGA
 
 
-import streams, strutils, colors, sequtils, marshal
+import streams, strutils, colors, sequtils, marshal, os
 type
   Header* = object
   #[
@@ -527,6 +527,5 @@ proc newImage*(header: Header, footer: Footer): Image =
 
 
 if isMainModule:
-  var image = newImage("african_head_diffuse.tga")
-  image.save("new_turtle.tga")
+  var image = newImage(paramStr(1))
 
