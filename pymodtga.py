@@ -23,9 +23,17 @@ class Image(object):
                    self.pixels, filename)
 
 
-def main(image_path):
+def main(image_path=None):
     image_path = image_path if image_path else sys.argv[1]
-    Image(image_path)
+    image = Image(image_path)
+    pixel = (255, 0, 0)
+    middle = image.image_height // 2
+
+    for row in range(middle):
+        for i in range(image.image_width):
+            image.pixels[(image.image_width * row) + i] = pixel
+
+    image.save("dump.tga")
 
 
 if __name__ == "__main__":

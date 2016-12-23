@@ -52,32 +52,40 @@ def pymod_nim(image_path):
     return pymodtga.main(image_path)
 
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-x = [0, 15, 150, 512, 1024, 2048, 4096]
-tests = [cpython, pypy, nuitka, nim, pymod_nim]
-# tests = [nim, ]
+with plt.xkcd():
+    fig = plt.figure()
+    plt.gca().xaxis.set_major_locator(plt.NullLocator())
+    ax = fig.add_subplot(111)
+    ax.tick_params(axis=u'both', which=u'both',length=0)
+    x = [0, 15, 150, 512, 1024, 2048, 4096]
+    # x = [0, 15, 150, 512, 1024]
+    tests = [cpython, pypy, nuitka, nim, pymod_nim]
+    # tests = [pypy, nim]
+    # plt.annotate(
+    #         'WARM-UP TIME',
+    #         xy=(15, 0.173), arrowprops=dict(arrowstyle='->'), xytext=(100, 2))
 
-for t in tests:
-    res = [0, ]
-    for image in ["pie_15_11.tga", "pie_150_113.tga",
-                  "pie_512_384.tga", "pie_1024_768.tga",
-                  "pie_2048_1536.tga", "pie_4096_3072.tga"]:
-        image_path = os.path.join(BASE_PATH, image)
-        res.append(t(image_path))
-    ax.plot(x, res, label=t.__name__)
+    for t in tests:
+        res = [0, ]
+        for image in ["pie_15_11.tga", "pie_150_113.tga",
+                      "pie_512_384.tga", "pie_1024_768.tga",
+                      "pie_2048_1536.tga", "pie_4096_3072.tga"]:
+        # for image in ["pie_15_11.tga", "pie_150_113.tga",
+        #             "pie_512_384.tga", "pie_1024_768.tga"]:
+            image_path = os.path.join(BASE_PATH, image)
+            res.append(t(image_path))
+        ax.plot(x, res, linewidth=1.5, label=t.__name__)
 
-plt.title('speed comparison')
+    plt.title('speed comparison', y=1.04)
 
-legend = ax.legend(loc='upper left', shadow=True)
-legend.get_frame().set_facecolor('#00FFCC')
+    legend = ax.legend(loc='upper left', frameon=False)
+    # legend.get_frame().set_facecolor('#00FFCC')
+    ax.set_xticks(x)
+    ax.set_ylabel("seconds")
+    ax.set_xlabel("image size")
+    labels = ax.set_xticklabels(x)
+    # ax.grid(True)
 
-ax.set_xticks(x)
-ax.set_ylabel("seconds")
-ax.set_xlabel("image size")
-labels = ax.set_xticklabels(x)
-ax.grid(True)
 
-
-# plt.show()
-plt.savefig("benchmark.png", bbox_inches='tight')
+    # plt.show()
+    plt.savefig("benchmark.png", bbox_inches='tight')

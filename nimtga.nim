@@ -1,7 +1,6 @@
 # this is a port of https://github.com/MircoT/pyTGA
-
-
 import streams, strutils, colors, sequtils, marshal, os
+
 type
   Header* = object
   #[
@@ -144,13 +143,12 @@ proc toColor*(pixel: Pixel): Color =
   else: discard
 
 proc newPixel* (r, g, b: range[0..255]): Pixel =
-  # TODO: see the forums for a cleaner implementation
   result.kind = pkRGB
-  var data_uint8: tuple[r, g, b: uint8]
-  data_uint8.r = r.uint8
-  data_uint8.g = g.uint8
-  data_uint8.b = b.uint8
-  result.rgb_val = data_uint8
+  result.rgb_val = (r: r.uint8, g: g.uint8, b: b.uint8)
+
+proc newPixel* (r, g, b, a: range[0..255]): Pixel =
+  result.kind = pkRGBA
+  result.rgba_val = (r: r.uint8, g: g.uint8, b: b.uint8, a: a.uint8)
 
 proc `$`*(pixel: Pixel): string =
   case pixel.kind
@@ -183,9 +181,6 @@ template to_int(expr: untyped): uint8 =
   cast[uint8](expr).uint8
 
 proc parse_pixel(self: var Image, fs: FileStream): Pixel =
-  # echo "header from parse: " & repr(self.header)
-  # echo "fs: " & repr(fs)
-  # echo "try to read"
   case self.header.image_type.int
   of 3, 11:
     let val = fs.readInt8().to_int
@@ -193,18 +188,15 @@ proc parse_pixel(self: var Image, fs: FileStream): Pixel =
   of 2, 10:
     case self.header.pixel_depth
     of 16:
-      # echo "px: 16"
       result = Pixel(
         kind: pkRGB,
         rgb_val: get_rgb_from_16(fs.readInt16()))
     of 24:
-      # echo "px: 24"
       result = Pixel(
         kind: pkRGB,
         rgb_val: (fs.readInt8().to_int, fs.readInt8().to_int, fs.readInt8().to_int)
       )
     of 32:
-      # echo "px: 32"
       result = Pixel(
         kind: pkRGBA,
         rgba_val: (fs.readInt8().to_int, fs.readInt8().to_int, fs.readInt8().to_int, fs.readInt8().to_int)
@@ -266,10 +258,6 @@ proc load(self: var Image, file_name: string) =
       # index = 0
       pixel: Pixel
     while pixel_count < tot_pixels:
-      # echo $pixel_count
-      # if new row
-      # echo "index: " & $index
-      # echo "row: " & $row
       # if index >= self.header.image_width.int - 1:
       #   index = 0
       #   if pixel_count <= tot_pixels - self.header.image_width.int:
@@ -277,7 +265,6 @@ proc load(self: var Image, file_name: string) =
       let repetition_count = fs.readInt8()
       let RLE: bool = (repetition_count and 0b10000000) shr 7 == 1
       let count: int = (repetition_count and 0b01111111).int + 1
-      # echo "count: " & $count
       pixel_count += count
 
       if RLE:
@@ -527,5 +514,17 @@ proc newImage*(header: Header, footer: Footer): Image =
 
 
 if isMainModule:
-  var image = newImage(paramStr(1))
+  let filename = paramStr(1)
+  var image = newImage(filename)
+  echo $image.header
+  let
+    middle = (image.header.image_height div 2).int
+    # TODO: fix stuff with endianess, now is ignored
+    pixel = newPixel(0, 0, 255)
+
+  for row in 0 .. middle:
+    for i in 0 .. image.header.image_width.int:
+      image.setPixel(row, i, pixel)
+
+  image.save("new_saved.tga")
 
