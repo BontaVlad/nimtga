@@ -1,5 +1,9 @@
 # this is a port of https://github.com/MircoT/pyTGA
-import streams, strutils, colors, sequtils, marshal, os
+import streams
+import strutils
+import colors
+import sequtils
+import os
 
 type
   Header* = object
@@ -90,7 +94,7 @@ type
     of pkBW: bw_val*: tuple[a: uint8]
     of pkRGB: rgb_val*: tuple[r, g, b: uint8]
     of pkRGBA: rgba_val*: tuple[r, g, b, a: uint8]
-  EncodedPixel = tuple[rep_count: uint8, value: Pixel]
+  EncodedPixel = tuple[rep_count: uint8, value: seq[Pixel]]
   Image* = object
     header*: Header
     footer*: Footer
@@ -101,6 +105,9 @@ type
     top_left*: int
     top_right*: int
     pixels*: seq[Pixel]
+
+template isLittleEndian(): bool =
+  cpuEndian == Endianness.littleEndian
 
 proc `==`*(a, b: Pixel): bool =
   if a.kind == b.kind:
@@ -155,18 +162,6 @@ proc `$`*(pixel: Pixel): string =
   of pkBW: result = "bw: $#" % [$pixel.bw_val.a]
   of pkRGB: result = "r: $#, g: $#, b: $#" % [$pixel.rgb_val.r, $pixel.rgb_val.g, $pixel.rgb_val.b]
   of pkRGBA: result = "r: $#, g: $#, b: $#, alpha: $#" % [$pixel.rgba_val.r, $pixel.rgba_val.g, $pixel.rgba_val.b, $pixel.rgba_val.a]
-proc setPixel*(self: var Image, row, index: int, value: Pixel) =
-  try:
-    self.pixels[(self.header.image_width.int * row) + index] = value
-  except IndexError:
-    echo "self.pixels.len: " & $self.pixels.len
-    echo "row: " & $row
-    echo "col: " & $index
-    echo "index: " & $((self.header.image_width.int * row) + index)
-
-proc getPixel*(self: Image, row, index: int): Pixel =
-  result = self.pixels[(self.header.image_width.int * row) + index]
-
 
 # TODO: this has rgb type hardcoded
 proc getPixelValue*(self: Image, index, val: int): uint8 {.inline.}=
@@ -249,19 +244,13 @@ proc load(self: var Image, file_name: string) =
   if self.header.image_type.int in [2, 3]:
     for row in 0 .. self.header.image_height.int - 1:
       for col in 0 .. self.header.image_width.int - 1:
-        self.setPixel(row, col, self.parse_pixel(fs))
+        self.pixels.add(self.parse_pixel(fs))
   # compressed
   elif self.header.image_type.int in [10, 11]:
     var
       pixel_count = 0
-      # row = 0
-      # index = 0
       pixel: Pixel
     while pixel_count < tot_pixels:
-      # if index >= self.header.image_width.int - 1:
-      #   index = 0
-      #   if pixel_count <= tot_pixels - self.header.image_width.int:
-      #     inc(row)
       let repetition_count = fs.readInt8()
       let RLE: bool = (repetition_count and 0b10000000) shr 7 == 1
       let count: int = (repetition_count and 0b01111111).int + 1
@@ -273,7 +262,8 @@ proc load(self: var Image, file_name: string) =
           self.pixels.add(pixel)
       else:
         for num in 0 .. count - 1:
-          self.pixels.add(self.parse_pixel(fs))
+          pixel = self.parse_pixel(fs)
+          self.pixels.add(pixel)
 
 template write_value[T](f: var File, data: T) =
   var tmp: T
@@ -287,10 +277,12 @@ template write_data(f: var File, data: string) =
     f.write_value(str)
 
 template write_pixel(f: var File, pixel: Pixel) =
+  var fields: seq[uint8]
   for name, value in pixel.fieldPairs:
     when name != "kind":
       for v in value.fields:
         f.write_value(v)
+
 
 proc write_header(f: var File, image: Image) =
   f.write_value(image.header.id_length)
@@ -396,38 +388,47 @@ iterator encode(row: seq[Pixel]): EncodedPixel {.inline.}=
     state = 0
     index = 0
     repetition_count: uint8 = 0
-    pixel_value: Pixel
+    pixel_value: seq[Pixel]
 
-  while index < row.high:
+  pixel_value = @[]
+
+  while index <= row.high:
     if state == 0:
       repetition_count = 0
-      pixel_value = row[index]
-      if row[index] == row[index + 1]:
+      if index == row.high:
+        pixel_value = @[row[index]]
+        yield (repetition_count, pixel_value)
+      elif row[index] == row[index + 1]:
         repetition_count = repetition_count or 0b10000000
+        pixel_value = @[row[index]]
         state = 1
       else:
+        pixel_value = @[row[index]]
         state = 2
       inc(index)
 
-    if state == 1:
-      if row[index] == pixel_value:
+    elif state == 1 and row[index] == pixel_value[0]:
         if (repetition_count and 0b1111111) == 127:
+          yield (repetition_count, pixel_value)
           repetition_count = 0b10000000
         else:
           inc(repetition_count)
         inc(index)
-      else:
-        state = 0
-        yield (repetition_count, pixel_value)
-
-    if state == 2 and row[index] != pixel_value:
+    elif state == 2 and row[index] != pixel_value[0]:
       if (repetition_count and 0b1111111) == 127:
-        repetition_count = 0
         yield (repetition_count, pixel_value)
+        repetition_count = 0
+        pixel_value = @[row[index]]
       else:
         inc(repetition_count)
-      yield (repetition_count, pixel_value)
+        pixel_value.add(row[index])
+      inc(index)
+    else:
+      yield(repetition_count, pixel_value)
       state = 0
+
+  if state != 0:
+    yield(repetition_count, pixel_value)
 
 proc save*(self: var Image, filename: string, compress=false, force_16_bit=false) =
   # ID LENGTH
@@ -473,16 +474,28 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
   defer: f.close()
 
   f.write_header(self)
+
   if not compress:
     for pixel in self.pixels:
       f.write_pixel(pixel)
-  # elif compress:
-  #   for i, row in pairs(self.pixels):
-  #     for count, value in encode(row):
-  #       if count > 127.uint8:
-  #         f.write_pixel(value)
-  #       else:
-  #         f.write_pixel(value)
+
+  elif compress:
+    let
+      width = self.header.image_width.int
+      height = self.header.image_height.int
+    var index = 0
+
+    for row in 1 .. height:
+      # echo "low " & $index
+      for count, value in encode(self.pixels[index .. index - 1 + width]):
+        f.write_value(count)
+        if count.int > 127:
+          f.write_pixel(value[0])
+        else:
+          for pixel in value:
+            f.write_pixel(pixel)
+      index += width
+      # echo "high " & $(index - 1)
   f.write_footer(self)
 
 
@@ -509,22 +522,15 @@ proc newImage*(header: Header, footer: Footer): Image =
   result = newImageImpl()
   result.header = header
   result.footer = footer
-  let pixel_count = result.header.image_height.int * result.header.image_width.int
-  result.pixels = repeat(newPixel(0, 0, 0), pixel_count)
-
 
 if isMainModule:
   let filename = paramStr(1)
-  var image = newImage(filename)
-  echo $image.header
+  var
+    image = newImage(filename)
   let
     middle = (image.header.image_height div 2).int
-    # TODO: fix stuff with endianess, now is ignored
-    pixel = newPixel(0, 0, 255)
+    pixel = newPixel(0, 0, 255, 255)
 
-  for row in 0 .. middle:
-    for i in 0 .. image.header.image_width.int:
-      image.setPixel(row, i, pixel)
-
-  image.save("new_saved.tga")
-
+  for i in middle * image.header.image_width.int .. image.pixels.high:
+    image.pixels[i] = pixel
+  image.save("new_saved.tga", compress=true)
