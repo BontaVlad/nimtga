@@ -486,7 +486,6 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
     var index = 0
 
     for row in 1 .. height:
-      # echo "low " & $index
       for count, value in encode(self.pixels[index .. index - 1 + width]):
         f.write_value(count)
         if count.int > 127:
@@ -495,7 +494,6 @@ proc save*(self: var Image, filename: string, compress=false, force_16_bit=false
           for pixel in value:
             f.write_pixel(pixel)
       index += width
-      # echo "high " & $(index - 1)
   f.write_footer(self)
 
 

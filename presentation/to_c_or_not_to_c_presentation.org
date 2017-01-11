@@ -1,0 +1,144 @@
+#+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/
+#+OPTIONS: toc:nil num:nil reveal_title_slide:nil
+
+* To C or not to C, let Nim answer the question!
+* Table of content
+#+ATTR_REVEAL: :frag (roll-in)
+- Introduction
+- Looking for trouble
+- Getting out of trouble
+- Did I get out of trouble?
+- Hello, is it Nim you're looking for?
+* Who is this 'me' I'm talking about?
+*Bonta Sergiu Vlad* or
+*Lucius Annaeus Surus* (ask me during pizza)
+
+Email: *bonta.vlad@gmail.com* or just google my name
+
+Web developer for about 3 years(it's less then 3 but not by much)
+
+Me knows mostly Python and Javascript
+* Buyers beware
+#+ATTR_REVEAL: :frag (roll-in)
+- I am you're average Joe programmer. No google inter-ship, no big project, not much of experience.
+- Every benchmark out there lies, this included.
+- I am very biased towards Nim.
+* Looking for trouble
+ *"Every Fairy Tale Needs A Good Old Fashioned Villain"*
+- cpu intensive
+- relative easy to explain
+- somehow similar to a real use case
+* The villain
+We have around 1000 Truevision images that we want to open, 
+fill the first half with red pixels(simulate a watermark?) and finally save it.
+* Speed matters!
+It's a batch process
+
+Each delay will add up!
+
+Image sizes: 15, 150, 512, 1024, 2048 and 4096 pixels wide.
+
+Smaller image size to tax JIT solutions(warm up time), bigger images sizes to see how well a solution scales or help JIT shine at it's best advantage(tight loops).
+* Truevision image format or *.tga
+Often referred to as targa: raster graphics format.
+
+Why tga?
+
+Simple compression algorithm.
+
+Used is computer graphics so it has some use cases.
+
+Found a python package that I could port(copy).
+* TGA structure
+
+| header               | pixel data     | footer           |
+|----------------------+----------------+------------------|
+| id length            | RLE            | Extension offset |
+| ...                  | or             | ...              |
+| image specifications | no compression | Signature        |
+
+
+Pixel structure:
+- Grayscale - 8 bit depth
+- RGB - 16 bit depth
+- RGB - 24 bit depth
+- RGBA - 32 bit depth
+* RLE compression algorithm Run-length encoding (RLE) 
+lossless data compression 
+
+A hypothetical scan line, with B representing a black pixel and W representing white, might read as follows:
+
+~WWWWBBBWWBBBBBBW~ 
+
+With a run-length encoding (RLE) data compression algorithm applied to the above hypothetical scan line, it can be rendered as follows:
+
+~4W3B2W6B1W~
+* Getting out of trouble
+Now that we know our "villain" how can we overcome it?
+* Keep it simple stupid!
+Maybe we can dodge a bullet by using more "cleaner" ways of getting the required speed
+
+We do not strive for the fastest implementation, we strive for "good enough" with minimal, preferably *none*, development time
+* cPython
+
+
+The hero we need, the hero we want(well most of the time at least)!
+
+The slowest implementation, but good reference point
+
+Serves as blueprint for the Nim implementation
+
+** 
+#+BEGIN_SRC python
+  class TGAHeader(object):
+      def __init__(self):
+          self.id_length = 0
+          self.color_map_type = 0
+          self.image_type = 0
+          # ...
+
+
+  class TGAFooter(object):
+
+      def __init__(self):
+          self.extension_area_offset = 0
+          self.developer_directory_offset = 0
+          self.signature = "TRUEVISION-XFILE"
+          # ...
+
+#+END_SRC
+
+** 
+#+BEGIN_SRC python
+  class Image(object):
+
+      def __init__(self):
+          self._header = TGAHeader()
+          self._footer = TGAFooter()
+          self._pixels = []
+
+      def load(self, file_name):
+          pass
+          # ...
+
+      def save(self, file_name, original_format=False, force_16_bit=False,
+               compress=False):
+          pass
+          # ...
+
+
+  @staticmethod
+  def _encode(row):
+      """Econde a row of pixels.
+      This function is a generator used during the compression phase. More
+      information on packets generated are after returns section."""
+      pass
+      # ...
+#+END_SRC
+* Nuitka
+#+BEGIN_QUOTE
+Nuitka is a Python compiler.
+It's fully compatible with Python 2.6, 2.7, 3.2, 3.3, and 3.4.
+
+You feed it your Python app, it does a lot of clever things, and spits out an executable or extension module.
+#+END_QUOTE

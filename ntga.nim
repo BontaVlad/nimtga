@@ -18,7 +18,6 @@ proc loads*(filename: string): tuple[header, footer: string, pixels: ptr PyArray
   var i = 0
   for mval in result.pixels.accessFlat(uint8).mitems:  # Forward-iterate through the array.
     mval = image.getPixelValue(i div 3, i mod 3)
-    # echo "loaded mval: " & $mval
     inc(i)
 
 proc saves*(header, footer: string, pixels: ptr PyArrayObject, filename: string) {.discardable, exportpy.}=
