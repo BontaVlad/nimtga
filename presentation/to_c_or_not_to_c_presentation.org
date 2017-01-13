@@ -20,7 +20,7 @@ Web developer for about 3 years(it's less then 3 but not by much)
 Me knows mostly Python and Javascript
 * Buyers beware
 #+ATTR_REVEAL: :frag (roll-in)
-- I am you're average Joe programmer. No google inter-ship, no big project, not much of experience.
+- I am you're average Joe programmer. No fancy big corporation, no big project, not much experience.
 - Every benchmark out there lies, this included.
 - I am very biased towards Nim.
 * Looking for trouble
@@ -30,7 +30,7 @@ Me knows mostly Python and Javascript
 - somehow similar to a real use case
 * The villain
 We have around 1000 Truevision images that we want to open, 
-fill the first half with red pixels(simulate a watermark?) and finally save it.
+fill the first 5 pixels with red color(simulate a watermark?) and finally save it.
 * Speed matters!
 It's a batch process
 
@@ -138,7 +138,30 @@ Serves as blueprint for the Nim implementation
 * Nuitka
 #+BEGIN_QUOTE
 Nuitka is a Python compiler.
-It's fully compatible with Python 2.6, 2.7, 3.2, 3.3, and 3.4.
+It's fully compatible with Python 2.7 .. 3.4.
 
 You feed it your Python app, it does a lot of clever things, and spits out an executable or extension module.
 #+END_QUOTE
+
+If interpreting things is slow, why not compile it? Sounds crazy? think again!
+** 
+~nuitka --recurse-all program.py~ and you are set. ~recurse-all~ option will transverse the dependencies tree and compile them to, one by one.
+* PyPy
+#+BEGIN_QUOTE
+PyPy is a fast, compliant alternative implementation of the Python language (2.7.12 and 3.3.5). It has several advantages and distinct features, speed, memory usage, compatibility, stackless
+#+END_QUOTE
+** 
+
+Get a huge speed improvement by just replacing ~python~ with ~pypy~ 
+
+eg: ~pypy program.py~. To good to be true? Yes, yes it is! 
+
+Two things: warmup time and incompatibility with all those good python modules written with the help of C. 
+
+* Nim
+#+BEGIN_QUOTE
+Nim (formerly known as "Nimrod") is a statically typed, imperative programming language that tries to give the programmer ultimate power without compromises on runtime efficiency. This means it focuses on compile-time mechanisms in all their various forms.
+#+END_QUOTE
+
+* Did I get out of trouble?
+* Fastest 3

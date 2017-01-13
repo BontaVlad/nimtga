@@ -149,13 +149,24 @@ proc toColor*(pixel: Pixel): Color =
   of pkRGBA: return rgb(pixel.rgba_val.r.int, pixel.rgba_val.g.int, pixel.rgba_val.b.int)
   else: discard
 
-proc newPixel* (r, g, b: range[0..255]): Pixel =
-  result.kind = pkRGB
-  result.rgb_val = (r: r.uint8, g: g.uint8, b: b.uint8)
+proc newPixel* (arr: seq[uint]): Pixel {.inline.}=
+  case arr.len
+  of 1:
+    result.kind = pkBW
+    result.bw_val.a = arr[0].uint8
+  of 3:
+    result.kind = pkRGB
+    result.rgb_val.r = arr[0].uint8
+    result.rgb_val.g = arr[1].uint8
+    result.rgb_val.b = arr[2].uint8
+  of 4:
+    result.kind = pkRGBA
+    result.rgba_val.r = arr[0].uint8
+    result.rgba_val.g = arr[1].uint8
+    result.rgba_val.b = arr[2].uint8
+    result.rgba_val.a = arr[3].uint8
+  else: raise newException(ValueError, "Invalid pixel data")
 
-proc newPixel* (r, g, b, a: range[0..255]): Pixel =
-  result.kind = pkRGBA
-  result.rgba_val = (r: r.uint8, g: g.uint8, b: b.uint8, a: a.uint8)
 
 proc `$`*(pixel: Pixel): string =
   case pixel.kind
@@ -163,14 +174,11 @@ proc `$`*(pixel: Pixel): string =
   of pkRGB: result = "r: $#, g: $#, b: $#" % [$pixel.rgb_val.r, $pixel.rgb_val.g, $pixel.rgb_val.b]
   of pkRGBA: result = "r: $#, g: $#, b: $#, alpha: $#" % [$pixel.rgba_val.r, $pixel.rgba_val.g, $pixel.rgba_val.b, $pixel.rgba_val.a]
 
-# TODO: this has rgb type hardcoded
-proc getPixelValue*(self: Image, index, val: int): uint8 {.inline.}=
-  let pixel = self.pixels[index]
-  case val
-  of 0: result = pixel.rgb_val.r
-  of 1: result = pixel.rgb_val.g
-  of 2: result = pixel.rgb_val.b
-  else: echo "invalid val: " & $val
+proc `[]`*(pixel: Pixel, index: int): uint8 {.inline.}=
+  case pixel.kind
+  of pkBW: result = pixel.bw_val.a
+  of pkRGB: result = [pixel.rgb_val.r, pixel.rgb_val.g, pixel.rgb_val.b][index]
+  of pkRGBA: result = [pixel.rgba_val.r, pixel.rgba_val.g, pixel.rgba_val.b, pixel.rgba_val.a][index]
 
 template to_int(expr: untyped): uint8 =
   cast[uint8](expr).uint8
@@ -520,15 +528,19 @@ proc newImage*(header: Header, footer: Footer): Image =
   result = newImageImpl()
   result.header = header
   result.footer = footer
+  result.pixels = @[]
 
-if isMainModule:
-  let filename = paramStr(1)
-  var
-    image = newImage(filename)
-  let
-    middle = (image.header.image_height div 2).int
-    pixel = newPixel(0, 0, 255, 255)
+# if isMainModule:
+#   try:
+#     let filename = commandLineParams()[0]
+#     var
+#       image = newImage(filename)
+#     let
+#       middle = (image.header.image_height div 2).int
+#       pixel = newPixel(@[0.uint, 0.uint, 255.uint, 255.uint])
 
-  for i in middle * image.header.image_width.int .. image.pixels.high:
-    image.pixels[i] = pixel
-  image.save("new_saved.tga", compress=true)
+#     for i in middle * image.header.image_width.int .. image.pixels.high:
+#       image.pixels[i] = pixel
+#     image.save("new_saved.tga", compress=true)
+#   except IndexError:
+#     quit("You must provide a image path!")
