@@ -10,14 +10,13 @@
 - Did I get out of trouble?
 - Hello, is it Nim you're looking for?
 * Who is this 'me' I'm talking about?
-*Bonta Sergiu Vlad* or
-*Lucius Annaeus Surus* (ask me during pizza)
+*Bonta Sergiu Vlad*
 
-Email: *bonta.vlad@gmail.com* or just google my name
+Email/contact: *bonta.vlad@gmail.com* or just google my name
 
 Web developer for about 3 years(it's less then 3 but not by much)
 
-Me knows mostly Python and Javascript
+Me knows mostly *Python* and *Javascript*
 * Buyers beware
 #+ATTR_REVEAL: :frag (roll-in)
 - I am you're average Joe programmer. No fancy big corporation, no big project, not much experience.
@@ -31,7 +30,7 @@ Me knows mostly Python and Javascript
 * The villain
 We have around 1000 Truevision images that we want to open, 
 fill the first 5 pixels with red color(simulate a watermark?) and finally save it.
-* Speed matters!
+* The need for speed: Hot pursuit two!
 It's a batch process
 
 Each delay will add up!
@@ -162,6 +161,198 @@ Two things: warmup time and incompatibility with all those good python modules w
 #+BEGIN_QUOTE
 Nim (formerly known as "Nimrod") is a statically typed, imperative programming language that tries to give the programmer ultimate power without compromises on runtime efficiency. This means it focuses on compile-time mechanisms in all their various forms.
 #+END_QUOTE
+** Tease at the end
+* Nim-pymod
+- Auto-generates a Python module that wraps a Nim module
+- pymod consists of Nim bindings & Python scripts to automate the generation of Python C-API extensions
+- There's even a PyArrayObject that provides a Nim interface to Numpy arrays.
+** 
+#+BEGIN_SRC nim
+  ## Compile this Nim module using the following command:
+  ##   python path/to/pmgen.py greeting.nim
 
+  ## Taken directly from the projects README
+
+  import strutils  # `%` operator
+
+  import pymod
+  import pymodpkg/docstrings
+
+  proc greet*(audience: string): string {.exportpy.} =
+    docstring"""Greet the specified audience with a familiar greeting.
+
+  The string returned will be a greeting directed specifically at that audience.
+    """
+    return "Hello, $1!" % audience
+
+  initPyModule("hw", greet)
+#+END_SRC
+** 
+#+BEGIN_SRC
+  >>> import hw
+  >>> hw.greet
+  <built-in function greet>
+  >>> hw.greet("World")
+  'Hello, World!'
+  >>> help(hw.greet)
+  Help on built-in function greet in module hw:
+
+  greet(...)
+      greet(audience: str) -> (str)
+
+      Parameters
+      ----------
+      audience : str -> string
+
+      Returns
+      -------
+      out : (str) <- (string)
+
+      Greet the specified audience with a familiar greeting.
+
+      The string returned will be a greeting directed specifically at that audience.
+  >>>
+#+END_SRC
+** Procedure parameter & return types
+
+The following Nim types are currently supported by Pymod:
+
+| Type family           | Nim types                                                                           | Python2 type    | Python3 type    |
+| floating-point        | `float`, `float32`, `float64`, `cfloat`, `cdouble`                                  | `float`         | `float`         |
+| signed integer        | `int`, `int16`, `int32`, `int64`, `cshort`, `cint`, `clong`                         | `int`           | `int`           |
+| unsigned integer      | `uint`, `uint8`, `uint16`, `uint32`, `uint64`, `cushort`, `cuint`, `culong`, `byte` | `int`           | `int`           |
+| non-unicode character | `char`, `cchar`                                                                     | `str`           | `bytes`         |
+| string                | `string`                                                                            | `str`           | `str`           |
+| Numpy array           | `ptr PyArrayObject`                                                                 | `numpy.ndarray` | `numpy.ndarray` |
+
+** Support for the following Nim types is in development: 
+
+| Type family                    | Nim types           | Python2 type | Python3 type  |
+| signed integer                 | `int8`              | `int`        | `int`         |
+| boolean                        | `bool`              | `bool`       | `bool`        |
+| unicode code point (character) | `unicode.Rune`      | `unicode`    | `str`         |
+| non-unicode character sequence | `seq[char]`         | `str`        | `bytes`       |
+| unicode code point sequence    | `seq[unicode.Rune]` | `unicode`    | `str`         |
+| sequence of a single type _T_  | `seq[T]`            | `list`       | `list`        |
+
+** Going Commando: ditching pymod and using ctypes
+Original blog post here: http://akehrer.github.io/posts/connecting-nim-to-python/
+#+BEGIN_SRC nim
+  # median_test.nim
+  proc median*(x: openArray[float]): float {. exportc, dynlib .} =
+    ## Computes the median of the elements in `x`.
+    ## If `x` is empty, NaN is returned.
+    if x.len == 0:
+      return NAN
+
+    var sx = @x # convert to a sequence since sort() won't take an openArray
+    sx.sort(system.cmp[float])
+
+  if sx.len mod 2 == 0:
+    var n1 = sx[(sx.len - 1) div 2]
+    var n2 = sx[sx.len div 2]
+    result = (n1 + n2) / 2.0
+  else:
+    result = sx[(sx.len - 1) div 2]
+#+END_SRC
+
+** Python Code
+#+BEGIN_SRC python
+  from ctypes import *
+
+  def main():
+      test_lib = CDLL('median_test')
+
+      # Function parameter types
+      test_lib.median.argtypes = [POINTER(c_double), c_int]
+
+      # Function return types
+      test_lib.median.restype = c_double
+
+      # Calc some numbers
+      nums = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+      nums_arr = (c_double * len(nums))()
+      for i,v in enumerate(nums):
+          nums_arr[i] = c_double(v)
+
+      med_res = test_lib.median(nums_arr, c_int(len(nums_arr)))
+      print('The median of %s is: %f'%(nums, med_res))
+
+  if __name__ == '__main__':
+      main()
+#+END_SRC
+
+** Compile and run
+#+BEGIN_SRC 
+  $nim c -d:release --app:lib median_test.nim
+  $python median.py
+  The median of [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0] is: 4.500000
+#+END_SRC
+** TODO: How do we know the arguments type?
 * Did I get out of trouble?
-* Fastest 3
+** PC specs
+- Motherboard: *IP35*
+- CPU: *Intel(R) Xeon(R) X5460 @ 3.16GHz 4 cores*
+- Memory: *DDR2 4GiB @ 800MHz*
+- HDD: *Seagate Baracuda* x 2 *RAID0*
+** 
+#+BEGIN_SRC python
+  import os
+  from subprocess import call
+
+  BASE_PATH = os.path.join(os.getcwd(), 'images')
+
+  def st_time(func):
+      from functools import wraps
+      import time
+
+      @wraps(func)
+      def st_func(*args, **kwargs):
+          t1 = time.time()
+          func(*args, **kwargs)
+          t2 = time.time()
+          return t2 - t1
+
+      return st_func
+
+
+  @st_time
+  def cpython(image_path):
+      from pyTGA.measure import main
+      return main(image_path)
+
+
+  @st_time
+  def pypy(image_path):
+      return call(["pypy", "pyTGA/measure.py", image_path])
+
+  # ...
+
+#+END_SRC
+** 
+#+BEGIN_SRC python
+  # start the x axis at 0
+  x = [0, 15, 150, 512, 1024, 2048, 4096]
+  tests = [cpython, pypy, nuitka, nim, pymod_nim]
+
+  for t in tests:
+      res = [0, ]    # 0 because we want to start from the same point on both axis
+      for image in ["pie_15_11.tga", "pie_150_113.tga",
+                    "pie_512_384.tga", "pie_1024_768.tga",
+                    "pie_2048_1536.tga", "pie_4096_3072.tga"]:
+          image_path = os.path.join(BASE_PATH, image)
+          # res will be ploted with matplotlib
+          res.append(t(image_path))
+          print "benchmarking: {} with size: {}".format(t.__name__, image)
+#+END_SRC
+** Results
+ [[/home/vlad/Experiments/nimtga/presentation/benchmark.png]]
+** Detail view on the fastest three
+ [[/home/vlad/Experiments/nimtga/presentation/benchmark_top_3.png]]
+** Detail view on small execution time
+ [[/home/vlad/Experiments/nimtga/presentation/benchmark_small_images.png]]
+* Hello, is it Nim you're looking for?
+** TODO: introduction
+** Use cases
+** Language features
+** Macros, C integration
