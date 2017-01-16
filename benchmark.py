@@ -56,9 +56,13 @@ fig = plt.figure()
 plt.gca().xaxis.set_major_locator(plt.NullLocator())
 ax = fig.add_subplot(111)
 ax.tick_params(axis=u'both', which=u'both',length=10)
-x = [0, 15, 150, 512, 1024, 2048, 4096]
+# x = [0, 15, 150, 512, 1024, 2048, 4096]
 # x = [0, 15, 150, 512, 1024]
+x = [0, 15, 150, 512]
 tests = [cpython, pypy, nuitka, nim, pymod_nim]
+images = ["pie_15_11.tga", "pie_150_113.tga",
+          "pie_512_384.tga", "pie_1024_768.tga",
+          "pie_2048_1536.tga", "pie_4096_3072.tga"]
 # tests = [nim, pymod_nim, pypy]
 # plt.annotate(
 #         'WARM-UP TIME',
@@ -66,11 +70,12 @@ tests = [cpython, pypy, nuitka, nim, pymod_nim]
 
 for t in tests:
     res = [0, ]
-    for image in ["pie_15_11.tga", "pie_150_113.tga",
-                  "pie_512_384.tga", "pie_1024_768.tga",
-                  "pie_2048_1536.tga", "pie_4096_3072.tga"]:
+    # for image in ["pie_15_11.tga", "pie_150_113.tga",
+    #               "pie_512_384.tga", "pie_1024_768.tga",
+    #               "pie_2048_1536.tga", "pie_4096_3072.tga"]:
     # for image in ["pie_15_11.tga", "pie_150_113.tga",
     #             "pie_512_384.tga", "pie_1024_768.tga"]:
+    for image in images:
         image_path = os.path.join(BASE_PATH, image)
         res.append(t(image_path))
         print "benchmarking: {} with size: {}".format(t.__name__, image)
@@ -87,4 +92,4 @@ ax.grid(True)
 
 
 # plt.show()
-plt.savefig("benchmark_top_3.png", bbox_inches='tight')
+plt.savefig("benchmark_small_images.png", bbox_inches='tight')
