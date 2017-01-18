@@ -615,15 +615,14 @@ Similarities and differences.
  \** Can be achieved with macros
 * " The real joke is your stubborn, bone deep conviction that somehow, somewhere, all of this makes sense! That's what cracks me up each time!" - Batman #681
 
-* Contact
+* 
 *Bonta Sergiu Vlad*
-
 Email: ~bonta.vlad@gmail.com~
 
-WWW: https://bontavlad.github.io
+#+ATTR_HTML: :style width: 15%
+#+CAPTION: https://bontavlad.github.io 
+[[./blog_qrc.jpg]]
 
-QR: TODO
-
-Github repo: https://github.com/BontaVlad/nimtga
-
-QR: TODO
+#+ATTR_HTML: :style width: 15%
+#+CAPTION: https://github.com/BontaVlad/nimtga 
+[[./presentation_qrc.jpg]]
