@@ -1,4 +1,4 @@
-#+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/
+# #+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/
 #+OPTIONS: toc:nil num:nil reveal_title_slide:nil
 #+TITLE: To C or not to C, let Nim anwser the question!
 #+AUTHOR: Bonta Sergiu Vlad
