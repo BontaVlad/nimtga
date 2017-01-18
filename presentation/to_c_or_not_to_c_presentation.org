@@ -1,5 +1,5 @@
-#+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/
-# #+REVEAL_ROOT: file:////home/Experiments/nimtga/presentation/reveal.js-2.1
+# #+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/
+# #+REVEAL_ROOT: file:///home/vlad/Experiments/nimtga/presentation/reveal.js/
 #+OPTIONS: toc:nil num:nil reveal_title_slide:nil
 #+TITLE: To C or not to C, let Nim anwser the question!
 #+AUTHOR: Bonta Sergiu Vlad
@@ -7,6 +7,14 @@
 
 * To C or not to C, let Nim answer the question!
 * Table of content
+
+#+BEGIN_NOTES
+Python is great but slow
+Talk about frustration with hello world examples
+Talk about others and how can they be reference
+Talk about this is not introduction to Nim
+#+END_NOTES
+
 #+ATTR_REVEAL: :frag (roll-in)
 - Introduction
 - Looking for trouble
@@ -14,7 +22,7 @@
 - Did I get out of trouble?
 - Hello, is it Nim you're looking for?
 * Me, myself and I
-[[http://i.imgur.com/8l6BRlt.jpg]]
+[[./joker.jpg]]
 
 *Bonta Sergiu Vlad* 
 
@@ -23,6 +31,10 @@ Email/contact: *bonta.vlad@gmail.com* or just google my name
 Web developer for about 3 years(it's less then 3 but not by much)
 
 Me knows mostly *Python* and *Javascript*
+
+#+BEGIN_NOTES
+Everybody can contribute.
+#+END_NOTES
 *  
 “Do I really look like a guy with a plan? You know what I am? I'm a dog chasing cars. I wouldn't know what to do with one if I caught it! You know, I just... *do* things.”
 
@@ -32,6 +44,9 @@ Me knows mostly *Python* and *Javascript*
 - I am you're average Joe programmer. No fancy big corporation, no big project, not much experience.
 - Every benchmark out there lies, this included.
 - I am very biased towards Nim.
+#+BEGIN_NOTES
+Just to spark interest in Nim, PyMod
+#+END_NOTES
 * “Madness, as you know, is a lot like gravity, all it takes is a little push” - The Joker
 * Looking for trouble
  *"Every Fairy Tale Needs A Good Old Fashioned Villain"*
@@ -44,7 +59,7 @@ fill the first 5 pixels with red color(simulate a watermark?) and finally save i
 ** Image used
 
     #+ATTR_HTML: :style max-width: 80%
-[[/home/vlad/Experiments/nimtga/images/preview.png]]
+[[./preview.png]]
 
 * Need for speed: Hot pursuit two!
 It's a batch process
@@ -54,6 +69,9 @@ Each delay will add up!
 Image sizes: 15, 150, 512, 1024, 2048 and 4096 pixels wide.
 
 # Smaller image size to tax JIT solutions(warm up time), bigger images sizes to see how well a solution scales or help JIT shine at it's best advantage(tight loops).
+#+BEGIN_NOTES
+Smaller images to tax JIT, bigger to help or see how scales
+#+END_NOTES
 * Truevision image format or *.tga
 Often referred to as targa: raster graphics format.
 
@@ -95,15 +113,17 @@ With a run-length encoding (RLE):
 * Getting out of trouble
 Now that we know our "villain" how can we overcome it?
 
+#+BEGIN_NOTES
+Why is important to have multiple options to chose from.
+#+END_NOTES
 * “If I have to have a past, then I prefer it to be multiple choice.” ― Joker from Batman: The Killing Joke
 
 * Keep it simple stupid!
 Maybe we can "cheat"!
 
 We do not strive for the fastest implementation, we strive for "good enough" with minimal, preferably *none*, development time
+
 * cPython
-
-
 The hero we need, the hero we want(well most of the time at least)!
 
 The slowest implementation, but good reference point
@@ -167,6 +187,9 @@ You feed it your Python app, it does a lot of clever things, and spits out an ex
 #+END_QUOTE
 
 If interpreting things is slow, why not compile it? Sounds crazy? think again!
+#+BEGIN_NOTES
+Help also with distribution
+#+END_NOTES
 ** 
 ~nuitka --recurse-all program.py~ and you are set. ~recurse-all~ option will transverse the dependencies tree and compile them to, one by one.
 
@@ -218,6 +241,9 @@ eg: ~pypy program.py~. To good to be true? Yes, yes it is!
 
 Two things: warmup time and incompatibility with all those good python modules written with the help of C. 
 
+#+BEGIN_NOTES
+We will talk at the end about nim
+#+END_NOTES
 * Nim
 #+BEGIN_QUOTE
 Nim (formerly known as "Nimrod") is a statically typed, imperative programming language that tries to give the programmer ultimate power without compromises on runtime efficiency. This means it focuses on compile-time mechanisms in all their various forms.
@@ -529,11 +555,11 @@ if __name__ == "__main__":
           print "benchmarking: {} with size: {}".format(t.__name__, image)
 #+END_SRC
 ** Results
-[[/home/vlad/Experiments/nimtga/presentation/benchmark.png]]
+[[./benchmark.png]]
 ** Detail view on the fastest three
- [[/home/vlad/Experiments/nimtga/presentation/benchmark_top_3.png]]
+ [[./benchmark_top_3.png]]
 ** Detail view on small execution time
- [[/home/vlad/Experiments/nimtga/presentation/benchmark_small_images.png]]
+ [[./benchmark_small_images.png]]
 * Hello, is it Nim you're looking for?
 
 * “True love is finding someone whose demons play well with yours” ― The Joker Batman Arkham City
@@ -588,4 +614,17 @@ Similarities and differences.
 
  \*Other backends supported and/or planned
  \** Can be achieved with macros
+* " The real joke is your stubborn, bone deep conviction that somehow, somewhere, all of this makes sense! That's what cracks me up each time!" - Batman #681
 
+* Contact
+*Bonta Sergiu Vlad*
+
+Email: ~bonta.vlad@gmail.com~
+
+WWW: https://bontavlad.github.io
+
+QR: TODO
+
+Github repo: https://github.com/BontaVlad/nimtga
+
+QR: TODO

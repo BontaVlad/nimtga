@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>To C or not to C, let Nim anwser the question!</title>
+<meta name="author" content="(Bonta Sergiu Vlad)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="./reveal.js/css/reveal.css"/>
+
+<link rel="stylesheet" href="./reveal.js/css/theme/moon.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = './reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<section>
+<section id="slide-orge6b11ef">
+<h2 id="orge6b11ef">To C or not to C, let Nim answer the question!</h2>
+</section>
+</section>
+<section>
+<section id="slide-orgd1f5763">
+<h2 id="orgd1f5763">Table of content</h2>
+<aside class="notes">
+<p>
+Python is great but slow
+Talk about frustration with hello world examples
+Talk about others and how can they be reference
+Talk about this is not introduction to Nim
+</p>
+
+</aside>
+
+<ul>
+<li class="fragment roll-in">Introduction</li>
+<li class="fragment roll-in">Looking for trouble</li>
+<li class="fragment roll-in">Getting out of trouble</li>
+<li class="fragment roll-in">Did I get out of trouble?</li>
+<li class="fragment roll-in">Hello, is it Nim you're looking for?</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgabe2681">
+<h2 id="orgabe2681">Me, myself and I</h2>
+
+<div class="figure">
+<p><img src="./joker.jpg" alt="joker.jpg" />
+</p>
+</div>
+
+<p>
+<b>Bonta Sergiu Vlad</b> 
+</p>
+
+<p>
+Email/contact: <b>bonta.vlad@gmail.com</b> or just google my name
+</p>
+
+<p>
+Web developer for about 3 years(it's less then 3 but not by much)
+</p>
+
+<p>
+Me knows mostly <b>Python</b> and <b>Javascript</b>
+</p>
+
+<aside class="notes">
+<p>
+Everybody can contribute.
+</p>
+
+</aside>
+</section>
+</section>
+<section>
+<section id="slide-org2d630b7">
+<h2 id="org2d630b7"></h2>
+<p>
+“Do I really look like a guy with a plan? You know what I am? I'm a dog chasing cars. I wouldn't know what to do with one if I caught it! You know, I just&#x2026; <b>do</b> things.”
+</p>
+
+<p>
+― The Joker - Heath Ledger
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org65bbc5b">
+<h2 id="org65bbc5b">Buyers beware</h2>
+<ul>
+<li class="fragment roll-in">I am you're average Joe programmer. No fancy big corporation, no big project, not much experience.</li>
+<li class="fragment roll-in">Every benchmark out there lies, this included.</li>
+<li class="fragment roll-in">I am very biased towards Nim.</li>
+
+</ul>
+<aside class="notes">
+<p>
+Just to spark interest in Nim, PyMod
+</p>
+
+</aside>
+</section>
+</section>
+<section>
+<section id="slide-org9c4db4f">
+<h2 id="org9c4db4f">“Madness, as you know, is a lot like gravity, all it takes is a little push” - The Joker</h2>
+</section>
+</section>
+<section>
+<section id="slide-org6897ac6">
+<h2 id="org6897ac6">Looking for trouble</h2>
+<p>
+<b>"Every Fairy Tale Needs A Good Old Fashioned Villain"</b>
+</p>
+<ul>
+<li>cpu intensive</li>
+<li>relative easy to explain</li>
+<li>somehow similar to a real use case</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgf5b9d56">
+<h2 id="orgf5b9d56">The villain</h2>
+<p>
+We have around 1000 Truevision images that we want to open, 
+fill the first 5 pixels with red color(simulate a watermark?) and finally save it.
+</p>
+</section>
+<section id="slide-orgd2809cd">
+<h3 id="orgd2809cd">Image used</h3>
+
+<div class="figure">
+<p><img src="./preview.png" alt="preview.png" style="max-width: 80%" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org8d33404">
+<h2 id="org8d33404">Need for speed: Hot pursuit two!</h2>
+<p>
+It's a batch process
+</p>
+
+<p>
+Each delay will add up!
+</p>
+
+<p>
+Image sizes: 15, 150, 512, 1024, 2048 and 4096 pixels wide.
+</p>
+
+<aside class="notes">
+<p>
+Smaller images to tax JIT, bigger to help or see how scales
+</p>
+
+</aside>
+</section>
+</section>
+<section>
+<section id="slide-orgdae936b">
+<h2 id="orgdae936b">Truevision image format or *.tga</h2>
+<p>
+Often referred to as targa: raster graphics format.
+</p>
+
+<p>
+Why tga?
+</p>
+
+<ul>
+<li class="fragment roll-in">Simple compression algorithm.</li>
+<li class="fragment roll-in">Used is computer graphics so it has some use cases.</li>
+<li class="fragment roll-in">Found a python package that I could port(copy).</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org377a451">
+<h2 id="org377a451">TGA structure</h2>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">header</th>
+<th scope="col" class="org-left">pixel data</th>
+<th scope="col" class="org-left">footer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">id length</td>
+<td class="org-left">RLE</td>
+<td class="org-left">Extension offset</td>
+</tr>
+
+<tr>
+<td class="org-left">&#x2026;</td>
+<td class="org-left">or</td>
+<td class="org-left">&#x2026;</td>
+</tr>
+
+<tr>
+<td class="org-left">image specifications</td>
+<td class="org-left">no compression</td>
+<td class="org-left">Signature</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>
+Pixel structure:
+</p>
+<ul>
+<li>Grayscale - 8 bit depth</li>
+<li>RGB - 16 bit depth</li>
+<li>RGB - 24 bit depth</li>
+<li>RGBA - 32 bit depth</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org3eb961e">
+<h2 id="org3eb961e">RLE compression algorithm Run-length encoding (RLE)</h2>
+<p>
+lossless data compression 
+</p>
+
+<p class="fragment (roll-in)">
+A hypothetical scan line, with B - black pixel and W - white:
+</p>
+
+<p class="fragment (roll-in)">
+<code>WWWWBBBWWBBBBBBW</code> 
+</p>
+
+<p class="fragment (roll-in)">
+With a run-length encoding (RLE):
+</p>
+
+<p class="fragment (roll-in)">
+<code>4W3B2W6B1W</code>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org821e2fc">
+<h2 id="org821e2fc">Getting out of trouble</h2>
+<p>
+Now that we know our "villain" how can we overcome it?
+</p>
+
+<aside class="notes">
+<p>
+Why is important to have multiple options to chose from.
+</p>
+
+</aside>
+</section>
+</section>
+<section>
+<section id="slide-org13ce096">
+<h2 id="org13ce096">“If I have to have a past, then I prefer it to be multiple choice.” ― Joker from Batman: The Killing Joke</h2>
+
+</section>
+</section>
+<section>
+<section id="slide-org5f85ded">
+<h2 id="org5f85ded">Keep it simple stupid!</h2>
+<p>
+Maybe we can "cheat"!
+</p>
+
+<p>
+We do not strive for the fastest implementation, we strive for "good enough" with minimal, preferably <b>none</b>, development time
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org5cbcb58">
+<h2 id="org5cbcb58">cPython</h2>
+<p>
+The hero we need, the hero we want(well most of the time at least)!
+</p>
+
+<p>
+The slowest implementation, but good reference point
+</p>
+
+<p>
+Serves as blueprint for the Nim implementation
+</p>
+
+</section>
+<section id="slide-orgfdd1d52">
+<h3 id="orgfdd1d52"></h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #4f97d7; font-weight: bold;">class</span> <span style="color: #ce537a; font-weight: bold;">TGAHeader</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7;">object</span><span style="color: #4f97d7;">)</span>:
+    <span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">__init__</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span><span style="color: #4f97d7;">)</span>:
+        <span style="color: #4f97d7; font-weight: bold;">self</span>.id_length = <span style="color: #a45bad;">0</span>
+        <span style="color: #4f97d7; font-weight: bold;">self</span>.color_map_type = <span style="color: #a45bad;">0</span>
+        <span style="color: #4f97d7; font-weight: bold;">self</span>.image_type = <span style="color: #a45bad;">0</span>
+        <span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">...</span>
+
+
+<span style="color: #4f97d7; font-weight: bold;">class</span> <span style="color: #ce537a; font-weight: bold;">TGAFooter</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7;">object</span><span style="color: #4f97d7;">)</span>:
+
+    <span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">__init__</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span><span style="color: #4f97d7;">)</span>:
+        <span style="color: #4f97d7; font-weight: bold;">self</span>.extension_area_offset = <span style="color: #a45bad;">0</span>
+        <span style="color: #4f97d7; font-weight: bold;">self</span>.developer_directory_offset = <span style="color: #a45bad;">0</span>
+        <span style="color: #4f97d7; font-weight: bold;">self</span>.signature = <span style="color: #2d9574;">"TRUEVISION-XFILE"</span>
+        <span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">...</span>
+</pre>
+</div>
+
+</section>
+<section id="slide-orgd0ca07a">
+<h3 id="orgd0ca07a"></h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #4f97d7; font-weight: bold;">class</span> <span style="color: #ce537a; font-weight: bold;">Image</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7;">object</span><span style="color: #4f97d7;">)</span>:
+
+    <span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">__init__</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span><span style="color: #4f97d7;">)</span>:
+        <span style="color: #4f97d7; font-weight: bold;">self</span>._header = TGAHeader<span style="color: #4f97d7;">()</span>
+        <span style="color: #4f97d7; font-weight: bold;">self</span>._footer = TGAFooter<span style="color: #4f97d7;">()</span>
+        <span style="color: #4f97d7; font-weight: bold;">self</span>._pixels = <span style="color: #4f97d7;">[]</span>
+
+    <span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">load</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span>, file_name<span style="color: #4f97d7;">)</span>:
+        <span style="color: #4f97d7; font-weight: bold;">pass</span>
+        <span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">...</span>
+
+    <span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">save</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span>, file_name, original_format=<span style="color: #a45bad;">False</span>, force_16_bit=<span style="color: #a45bad;">False</span>,
+             compress=<span style="color: #a45bad;">False</span><span style="color: #4f97d7;">)</span>:
+        <span style="color: #4f97d7; font-weight: bold;">pass</span>
+        <span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">...</span>
+
+
+<span style="color: #ce537a; font-weight: bold;">@staticmethod</span>
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">_encode</span><span style="color: #4f97d7;">(</span>row<span style="color: #4f97d7;">)</span>:
+    <span style="color: #2aa1ae;">"""Econde a row of pixels.</span>
+<span style="color: #2aa1ae;">    This function is a generator used during the compression phase. More</span>
+<span style="color: #2aa1ae;">    information on packets generated are after returns section."""</span>
+    <span style="color: #4f97d7; font-weight: bold;">pass</span>
+    <span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">...</span>
+</pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgb8db966">
+<h2 id="orgb8db966">Nuitka</h2>
+<blockquote nil>
+<p>
+Nuitka is a Python compiler.
+It's fully compatible with Python 2.7 .. 3.4.
+</p>
+
+<p>
+You feed it your Python app, it does a lot of clever things, and spits out an executable or extension module.
+</p>
+</blockquote>
+
+<p>
+If interpreting things is slow, why not compile it? Sounds crazy? think again!
+</p>
+<aside class="notes">
+<p>
+Help also with distribution
+</p>
+
+</aside>
+</section>
+<section id="slide-org8c497f0">
+<h3 id="org8c497f0"></h3>
+<p>
+<code>nuitka --recurse-all program.py</code> and you are set. <code>recurse-all</code> option will transverse the dependencies tree and compile them to, one by one.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgef6eb39">
+<h2 id="orgef6eb39">Numba</h2>
+<p>
+With a few annotations, array-oriented and math-heavy Python code can be made to be similar in performance to C, C++ and Fortran.
+</p>
+
+<p>
+Numba works by generating optimized machine code using the LLVM compiler.
+</p>
+
+<p>
+Compilation can run on either CPU or GPU hardware, integrates well with Python scientific software stack.
+</p>
+</section>
+<section id="slide-org8cec78a">
+<h3 id="org8cec78a"></h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">Taken directly from the project home page</span>
+<span style="color: #4f97d7; font-weight: bold;">from</span> numba <span style="color: #4f97d7; font-weight: bold;">import</span> jit
+<span style="color: #4f97d7; font-weight: bold;">from</span> numpy <span style="color: #4f97d7; font-weight: bold;">import</span> arange
+
+<span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">jit decorator tells Numba to compile this function.</span>
+<span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">The argument types will be inferred by Numba when function is called.</span>
+<span style="color: #ce537a; font-weight: bold;">@jit</span>
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">sum2d</span><span style="color: #4f97d7;">(</span>arr<span style="color: #4f97d7;">)</span>:
+    <span style="color: #7590db;">M</span>, <span style="color: #7590db;">N</span> = arr.shape
+    <span style="color: #7590db;">result</span> = <span style="color: #a45bad;">0</span>.<span style="color: #a45bad;">0</span>
+    <span style="color: #4f97d7; font-weight: bold;">for</span> i <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #4f97d7;">range</span><span style="color: #4f97d7;">(</span>M<span style="color: #4f97d7;">)</span>:
+        <span style="color: #4f97d7; font-weight: bold;">for</span> j <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #4f97d7;">range</span><span style="color: #4f97d7;">(</span>N<span style="color: #4f97d7;">)</span>:
+            <span style="color: #7590db;">result</span> += arr<span style="color: #4f97d7;">[</span>i,j<span style="color: #4f97d7;">]</span>
+    <span style="color: #4f97d7; font-weight: bold;">return</span> result
+
+<span style="color: #7590db;">a</span> = arange<span style="color: #4f97d7;">(</span><span style="color: #a45bad;">9</span><span style="color: #4f97d7;">)</span>.reshape<span style="color: #4f97d7;">(</span><span style="color: #a45bad;">3</span>,<span style="color: #a45bad;">3</span><span style="color: #4f97d7;">)</span>
+<span style="color: #4f97d7; font-weight: bold;">print</span><span style="color: #4f97d7;">(</span>sum2d<span style="color: #bc6ec5;">(</span>a<span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+</section>
+<section id="slide-orge336e7a">
+<h3 id="orge336e7a">Not included in the benchmark because:</h3>
+<p>
+The following Python language features are not currently supported:
+</p>
+
+<ul>
+<li>Function definition</li>
+<li>Class definition</li>
+<li>Exception handling (<code>try .. except</code>, <code>try .. finally</code>)</li>
+<li>Context management (the <code>with</code> statement)</li>
+<li>Comprehensions (either <code>list</code>, <code>dict</code>, <code>set</code> or <code>generator comprehensions</code>)</li>
+<li>Generator delegation (<code>yield from</code>)</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orga3399ab">
+<h2 id="orga3399ab">PyPy</h2>
+<blockquote nil>
+<p>
+PyPy is a fast, compliant alternative implementation of the Python language (2.7.12 and 3.3.5). It has several advantages and distinct features, speed, memory usage, compatibility, stackless
+</p>
+</blockquote>
+</section>
+<section id="slide-org43636e5">
+<h3 id="org43636e5"></h3>
+<p>
+Get a huge speed improvement by just replacing <code>python</code> with <code>pypy</code> 
+</p>
+
+<p>
+eg: <code>pypy program.py</code>. To good to be true? Yes, yes it is! 
+</p>
+
+<p>
+Two things: warmup time and incompatibility with all those good python modules written with the help of C. 
+</p>
+
+<aside class="notes">
+<p>
+We will talk at the end about nim
+</p>
+
+</aside>
+</section>
+</section>
+<section>
+<section id="slide-org046c941">
+<h2 id="org046c941">Nim</h2>
+<blockquote nil>
+<p>
+Nim (formerly known as "Nimrod") is a statically typed, imperative programming language that tries to give the programmer ultimate power without compromises on runtime efficiency. This means it focuses on compile-time mechanisms in all their various forms.
+</p>
+</blockquote>
+</section>
+</section>
+<section>
+<section id="slide-org98eda1c">
+<h2 id="org98eda1c">Nim-pymod</h2>
+<ul>
+<li>Auto-generates a Python module that wraps a Nim module</li>
+<li>pymod consists of Nim bindings &amp; Python scripts to automate the generation of Python C-API extensions</li>
+<li>There's even a PyArrayObject that provides a Nim interface to Numpy arrays.</li>
+
+</ul>
+</section>
+<section id="slide-orga926de8">
+<h3 id="orga926de8"></h3>
+<div class="org-src-container">
+
+<pre  class="src src-nim"><span style="color: #2aa1ae;">## Compile this Nim module using the following command:</span>
+<span style="color: #2aa1ae;">##   python path/to/pmgen.py greeting.nim</span>
+
+<span style="color: #2aa1ae;">## Taken directly from the projects README</span>
+
+<span style="color: #4f97d7; font-weight: bold;">import</span> strutils  <span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #a45bad; background-color: #292e34;">`%`</span><span style="color: #2aa1ae; background-color: #292e34;"> operator</span>
+
+<span style="color: #4f97d7; font-weight: bold;">import</span> pymod
+<span style="color: #4f97d7; font-weight: bold;">import</span> pymodpkg/docstrings
+
+<span style="color: #4f97d7; font-weight: bold;">proc</span><span style="color: #bc6ec5; font-weight: bold; font-style: italic;"> greet*</span><span style="color: #4f97d7;">(</span>audience: <span style="color: #ce537a; font-weight: bold;">string</span><span style="color: #4f97d7;">)</span>: <span style="color: #ce537a; font-weight: bold;">string</span> <span style="color: #4f97d7;">{</span>.exportpy.<span style="color: #4f97d7;">}</span> =
+  docstring<span style="color: #2d9574;">"""Greet the specified audience with a familiar greeting.</span>
+
+<span style="color: #2d9574;">The string returned will be a greeting directed specifically at that audience.</span>
+<span style="color: #2d9574;">  """</span>
+  <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #2d9574;">"Hello, $1!"</span> % audience
+
+initPyModule<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">"hw"</span>, greet<span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+</section>
+<section id="slide-org744ae0e">
+<h3 id="org744ae0e"></h3>
+<pre  class="example">
+&gt;&gt;&gt; import hw
+&gt;&gt;&gt; hw.greet
+&lt;built-in function greet&gt;
+&gt;&gt;&gt; hw.greet("World")
+'Hello, World!'
+&gt;&gt;&gt; help(hw.greet)
+Help on built-in function greet in module hw:
+
+greet(...)
+    greet(audience: str) -&gt; (str)
+
+    Parameters
+    ----------
+    audience : str -&gt; string
+
+    Returns
+    -------
+    out : (str) &lt;- (string)
+
+    Greet the specified audience with a familiar greeting.
+
+    The string returned will be a greeting directed specifically at that audience.
+&gt;&gt;&gt;
+</pre>
+</section>
+<section id="slide-org028c6a9">
+<h3 id="org028c6a9">Procedure parameter &amp; return types</h3>
+<p>
+The following Nim types are currently supported by Pymod:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides" style="font-size: 60%">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Type family</th>
+<th scope="col" class="org-left">Nim types</th>
+<th scope="col" class="org-left">Python2 type</th>
+<th scope="col" class="org-left">Python3 type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">floating-point</td>
+<td class="org-left">`float`, `float32`, `float64`, `cfloat`, `cdouble`</td>
+<td class="org-left">`float`</td>
+<td class="org-left">`float`</td>
+</tr>
+
+<tr>
+<td class="org-left">signed integer</td>
+<td class="org-left">`int`, `int16`, `int32`, `int64`, `cshort`, `cint`, `clong`</td>
+<td class="org-left">`int`</td>
+<td class="org-left">`int`</td>
+</tr>
+
+<tr>
+<td class="org-left">unsigned integer</td>
+<td class="org-left">`uint`, `uint8`, `uint16`, `uint32`, `uint64`, `cushort`, `cuint`, `culong`, `byte`</td>
+<td class="org-left">`int`</td>
+<td class="org-left">`int`</td>
+</tr>
+
+<tr>
+<td class="org-left">non-unicode character</td>
+<td class="org-left">`char`, `cchar`</td>
+<td class="org-left">`str`</td>
+<td class="org-left">`bytes`</td>
+</tr>
+
+<tr>
+<td class="org-left">string</td>
+<td class="org-left">`string`</td>
+<td class="org-left">`str`</td>
+<td class="org-left">`str`</td>
+</tr>
+
+<tr>
+<td class="org-left">Numpy array</td>
+<td class="org-left">`ptr PyArrayObject`</td>
+<td class="org-left">`numpy.ndarray`</td>
+<td class="org-left">`numpy.ndarray`</td>
+</tr>
+</tbody>
+</table>
+
+</section>
+<section id="slide-org7fe0409">
+<h3 id="org7fe0409">Support for the following Nim types is in development:</h3>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides" style="font-size: 60%">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Type family</th>
+<th scope="col" class="org-left">Nim types</th>
+<th scope="col" class="org-left">Python2 type</th>
+<th scope="col" class="org-left">Python3 type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">signed integer</td>
+<td class="org-left">`int8`</td>
+<td class="org-left">`int`</td>
+<td class="org-left">`int`</td>
+</tr>
+
+<tr>
+<td class="org-left">boolean</td>
+<td class="org-left">`bool`</td>
+<td class="org-left">`bool`</td>
+<td class="org-left">`bool`</td>
+</tr>
+
+<tr>
+<td class="org-left">unicode code point (character)</td>
+<td class="org-left">`unicode.Rune`</td>
+<td class="org-left">`unicode`</td>
+<td class="org-left">`str`</td>
+</tr>
+
+<tr>
+<td class="org-left">non-unicode character sequence</td>
+<td class="org-left">`seq[char]`</td>
+<td class="org-left">`str`</td>
+<td class="org-left">`bytes`</td>
+</tr>
+
+<tr>
+<td class="org-left">unicode code point sequence</td>
+<td class="org-left">`seq[unicode.Rune]`</td>
+<td class="org-left">`unicode`</td>
+<td class="org-left">`str`</td>
+</tr>
+
+<tr>
+<td class="org-left">sequence of a single type <span class="underline">T</span></td>
+<td class="org-left">`seq[T]`</td>
+<td class="org-left">`list`</td>
+<td class="org-left">`list`</td>
+</tr>
+</tbody>
+</table>
+
+</section>
+<section id="slide-org16c6982">
+<h3 id="org16c6982">Going Commando: ditching pymod and using ctypes</h3>
+<p>
+Original blog post here: <a href="http://akehrer.github.io/posts/connecting-nim-to-python/">http://akehrer.github.io/posts/connecting-nim-to-python/</a>
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-nim"><span style="color: #2aa1ae; background-color: #292e34;"># median_test.nim</span>
+<span style="color: #4f97d7; font-weight: bold;">proc</span><span style="color: #bc6ec5; font-weight: bold; font-style: italic;"> median*</span><span style="color: #4f97d7;">(</span>x: <span style="color: #ce537a; font-weight: bold;">openArray</span><span style="color: #bc6ec5;">[</span><span style="color: #ce537a; font-weight: bold;">float</span><span style="color: #bc6ec5;">]</span><span style="color: #4f97d7;">)</span>: <span style="color: #ce537a; font-weight: bold;">float</span> <span style="color: #4f97d7;">{</span>. <span style="color: #bc6ec5;">exportc</span>, <span style="color: #bc6ec5;">dynlib</span> .<span style="color: #4f97d7;">}</span> =
+  <span style="color: #2aa1ae;">## Computes the median of the elements in </span><span style="color: #a45bad;">`x`</span><span style="color: #2aa1ae;">.</span>
+  <span style="color: #2aa1ae;">## If </span><span style="color: #a45bad;">`x`</span><span style="color: #2aa1ae;"> is empty, NaN is returned.</span>
+  <span style="color: #4f97d7; font-weight: bold;">if</span> x.<span style="color: #4f97d7;">len</span> == <span style="color: #a45bad;">0</span>:
+    <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #a45bad;">NAN</span>
+
+  <span style="color: #4f97d7; font-weight: bold;">var</span> <span style="color: #7590db;">sx </span>= @x <span style="color: #2aa1ae; background-color: #292e34;"># convert to a sequence since sort() won't take an openArray</span>
+  sx.sort<span style="color: #4f97d7;">(</span>system.<span style="color: #4f97d7;">cmp</span><span style="color: #bc6ec5;">[</span><span style="color: #ce537a; font-weight: bold;">float</span><span style="color: #bc6ec5;">]</span><span style="color: #4f97d7;">)</span>
+
+<span style="color: #4f97d7; font-weight: bold;">if</span> sx.<span style="color: #4f97d7;">len</span> <span style="color: #4f97d7;">mod</span> <span style="color: #a45bad;">2</span> == <span style="color: #a45bad;">0</span>:
+  <span style="color: #4f97d7; font-weight: bold;">var</span> <span style="color: #7590db;">n1 </span>= sx<span style="color: #4f97d7;">[</span><span style="color: #bc6ec5;">(</span>sx.<span style="color: #4f97d7;">len</span> - <span style="color: #a45bad;">1</span><span style="color: #bc6ec5;">)</span> <span style="color: #4f97d7;">div</span> <span style="color: #a45bad;">2</span><span style="color: #4f97d7;">]</span>
+  <span style="color: #4f97d7; font-weight: bold;">var</span> <span style="color: #7590db;">n2 </span>= sx<span style="color: #4f97d7;">[</span>sx.<span style="color: #4f97d7;">len</span> <span style="color: #4f97d7;">div</span> <span style="color: #a45bad;">2</span><span style="color: #4f97d7;">]</span>
+  <span style="color: #7590db;">result</span> = <span style="color: #4f97d7;">(</span>n1 + n2<span style="color: #4f97d7;">)</span> / <span style="color: #a45bad;">2</span>.<span style="color: #a45bad;">0</span>
+<span style="color: #4f97d7; font-weight: bold;">else</span>:
+  <span style="color: #7590db;">result</span> = sx<span style="color: #4f97d7;">[</span><span style="color: #bc6ec5;">(</span>sx.<span style="color: #4f97d7;">len</span> - <span style="color: #a45bad;">1</span><span style="color: #bc6ec5;">)</span> <span style="color: #4f97d7;">div</span> <span style="color: #a45bad;">2</span><span style="color: #4f97d7;">]</span>
+</pre>
+</div>
+
+</section>
+<section id="slide-orgc2762e4">
+<h3 id="orgc2762e4">Python Code</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #4f97d7; font-weight: bold;">from</span> ctypes <span style="color: #4f97d7; font-weight: bold;">import</span> *
+
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">main</span><span style="color: #4f97d7;">()</span>:
+    <span style="color: #7590db;">test_lib</span> = CDLL<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">'median_test'</span><span style="color: #4f97d7;">)</span>
+
+    <span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">Function parameter types</span>
+    <span style="color: #7590db;">test_lib.median.argtypes</span> = <span style="color: #4f97d7;">[</span>POINTER<span style="color: #bc6ec5;">(</span>c_double<span style="color: #bc6ec5;">)</span>, c_int<span style="color: #4f97d7;">]</span>
+
+    <span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">Function return types</span>
+    <span style="color: #7590db;">test_lib.median.restype</span> = c_double
+
+    <span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">Calc some numbers</span>
+    <span style="color: #7590db;">nums</span> = <span style="color: #4f97d7;">[</span><span style="color: #a45bad;">1</span>.<span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">2</span>.<span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">3</span>.<span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">4</span>.<span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">5</span>.<span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">6</span>.<span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">7</span>.<span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">8</span>.<span style="color: #a45bad;">0</span><span style="color: #4f97d7;">]</span>
+    <span style="color: #7590db;">nums_arr</span> = <span style="color: #4f97d7;">(</span>c_double * <span style="color: #4f97d7;">len</span><span style="color: #bc6ec5;">(</span>nums<span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)()</span>
+    <span style="color: #4f97d7; font-weight: bold;">for</span> i,v <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #4f97d7;">enumerate</span><span style="color: #4f97d7;">(</span>nums<span style="color: #4f97d7;">)</span>:
+        <span style="color: #7590db;">nums_arr</span><span style="color: #4f97d7;">[</span>i<span style="color: #4f97d7;">]</span> = c_double<span style="color: #4f97d7;">(</span>v<span style="color: #4f97d7;">)</span>
+
+    <span style="color: #7590db;">med_res</span> = test_lib.median<span style="color: #4f97d7;">(</span>nums_arr, c_int<span style="color: #bc6ec5;">(</span><span style="color: #4f97d7;">len</span><span style="color: #2d9574;">(</span>nums_arr<span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+    <span style="color: #4f97d7; font-weight: bold;">print</span><span style="color: #4f97d7;">(</span><span style="color: #2d9574;">'The median of %s is: %f'</span>%<span style="color: #bc6ec5;">(</span>nums, med_res<span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+
+<span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7;">__name__</span> == <span style="color: #2d9574;">'__main__'</span>:
+    main<span style="color: #4f97d7;">()</span>
+</pre>
+</div>
+
+</section>
+<section id="slide-orgf63fbb8">
+<h3 id="orgf63fbb8">Compile and run</h3>
+<pre  class="example">
+$nim c -d:release --app:lib median_test.nim
+$python median.py
+The median of [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0] is: 4.500000
+</pre>
+</section>
+<section id="slide-orga4ec353">
+<h3 id="orga4ec353">How do we know the arguments type?</h3>
+<div class="org-src-container">
+
+<pre  class="src src-sh">nim c --app:lib --header median_test.nim
+</pre>
+</div>
+
+<p>
+The <code>--header</code> option will produce a C header file in the nimcache folder where the module is compiled.
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-C"><span style="color: #bc6ec5;">#if</span><span style="color: #bc6ec5;">n</span><span style="color: #bc6ec5;">def</span> __median_test__
+<span style="color: #bc6ec5;">#define</span> <span style="color: #7590db;">__median_test__</span>
+<span style="color: #bc6ec5;">#define</span> <span style="color: #7590db;">NIM_INTBITS</span> <span style="color: #a45bad;">32</span>
+<span style="color: #bc6ec5;">#include</span> <span style="color: #2d9574;">"nimbase.h"</span>
+N_NOCONV<span style="color: #4f97d7;">(</span><span style="color: #ce537a; font-weight: bold;">void</span>, signalHandler<span style="color: #4f97d7;">)(</span><span style="color: #ce537a; font-weight: bold;">int</span> <span style="color: #7590db;">sig</span><span style="color: #4f97d7;">)</span>;
+N_NIMCALL<span style="color: #4f97d7;">(</span>NI, getRefcount<span style="color: #4f97d7;">)(</span><span style="color: #ce537a; font-weight: bold;">void</span>* <span style="color: #7590db;">p</span><span style="color: #4f97d7;">)</span>;
+<span style="color: #ce537a; font-weight: bold;">N_LIB_IMPORT</span> <span style="color: #bc6ec5; font-weight: bold;">N_CDECL</span><span style="color: #4f97d7;">(</span>NF, median<span style="color: #4f97d7;">)(</span><span style="color: #ce537a; font-weight: bold;">NF</span>* <span style="color: #7590db;">x</span>, <span style="color: #ce537a; font-weight: bold;">NI</span> <span style="color: #7590db;">xLen0</span><span style="color: #4f97d7;">)</span>;
+<span style="color: #ce537a; font-weight: bold;">N_LIB_IMPORT</span> <span style="color: #bc6ec5; font-weight: bold;">N_CDECL</span><span style="color: #4f97d7;">(</span><span style="color: #ce537a; font-weight: bold;">void</span>, NimMain<span style="color: #4f97d7;">)(</span><span style="color: #ce537a; font-weight: bold;">void</span><span style="color: #4f97d7;">)</span>;
+<span style="color: #bc6ec5;">#endif</span> <span style="color: #2aa1ae; background-color: #292e34;">/* </span><span style="color: #2aa1ae; background-color: #292e34;">__median_test__ </span><span style="color: #2aa1ae; background-color: #292e34;">*/</span>
+</pre>
+</div>
+
+</section>
+<section id="slide-org97ba960">
+<h3 id="org97ba960">PyMod -&gt; NimTga implementation</h3>
+<div class="org-src-container">
+
+<pre  class="src src-nim"><span style="color: #2aa1ae; background-color: #292e34;"># ...</span>
+<span style="color: #4f97d7; font-weight: bold;">proc</span><span style="color: #bc6ec5; font-weight: bold; font-style: italic;"> loads*</span><span style="color: #4f97d7;">(</span>filename: <span style="color: #ce537a; font-weight: bold;">string</span><span style="color: #4f97d7;">)</span>: <span style="color: #ce537a; font-weight: bold;">tuple</span><span style="color: #4f97d7;">[</span>header, footer: <span style="color: #ce537a; font-weight: bold;">string</span>, pixels: <span style="color: #4f97d7; font-weight: bold;">ptr</span> PyArrayObject<span style="color: #4f97d7;">]</span> <span style="color: #4f97d7;">{</span>.exportpy, returnDict.<span style="color: #4f97d7;">}</span>=
+  <span style="color: #4f97d7; font-weight: bold;">let</span> <span style="color: #7590db;">image </span>= newImage<span style="color: #4f97d7;">(</span>filename<span style="color: #4f97d7;">)</span>
+  <span style="color: #4f97d7; font-weight: bold;">let</span> <span style="color: #7590db;">shape </span>= getShape<span style="color: #4f97d7;">(</span>image.header<span style="color: #4f97d7;">)</span> <span style="color: #2aa1ae; background-color: #292e34;"># pixel shape: 1, 3 or 4 values</span>
+  <span style="color: #7590db;">result</span>.header = $$image.header
+  <span style="color: #7590db;">result</span>.footer = $$image.footer
+  <span style="color: #2aa1ae; background-color: #292e34;"># create a numpy array [[...shape], [...shape]]</span>
+  <span style="color: #7590db;">result</span>.pixels = createSimpleNew<span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">[</span>image.pixels.<span style="color: #4f97d7; font-style: italic;">high</span>, shape<span style="color: #bc6ec5;">]</span>, np_uint8<span style="color: #4f97d7;">)</span> 
+  <span style="color: #2aa1ae; background-color: #292e34;"># fill them with zeroes to get rid of random values</span>
+  doFILLWBYTE<span style="color: #4f97d7;">(</span><span style="color: #7590db;">result</span>.pixels, <span style="color: #a45bad;">0</span><span style="color: #4f97d7;">)</span>
+
+  <span style="color: #4f97d7; font-weight: bold;">var</span> <span style="color: #7590db;">i </span>= <span style="color: #a45bad;">0</span>
+  <span style="color: #4f97d7; font-weight: bold;">for</span> mval <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #7590db;">result</span>.pixels.accessFlat<span style="color: #4f97d7;">(</span><span style="color: #ce537a; font-weight: bold;">uint8</span><span style="color: #4f97d7;">)</span>.<span style="color: #4f97d7;">mitems</span>:  <span style="color: #2aa1ae; background-color: #292e34;"># Forward-iterate through the array.</span>
+    mval = image.pixels<span style="color: #4f97d7;">[</span>i <span style="color: #4f97d7;">div</span> shape<span style="color: #4f97d7;">][</span>i <span style="color: #4f97d7;">mod</span> shape<span style="color: #4f97d7;">]</span>
+    <span style="color: #4f97d7;">inc</span><span style="color: #4f97d7;">(</span>i<span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+</section>
+<section id="slide-org1737467">
+<h3 id="org1737467"></h3>
+<div class="org-src-container">
+
+<pre  class="src src-nim"><span style="color: #4f97d7; font-weight: bold;">proc</span><span style="color: #bc6ec5; font-weight: bold; font-style: italic;"> saves*</span><span style="color: #4f97d7;">(</span>header, footer: <span style="color: #ce537a; font-weight: bold;">string</span>, pixels: <span style="color: #4f97d7; font-weight: bold;">ptr </span><span style="color: #ce537a; font-weight: bold;">PyArrayObject</span>, filename: <span style="color: #ce537a; font-weight: bold;">string</span>, compress: <span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7;">{</span>.discardable, exportpy.<span style="color: #4f97d7;">}</span>=
+  <span style="color: #4f97d7; font-weight: bold;">var</span>
+    image = newImage<span style="color: #4f97d7;">(</span>to<span style="color: #bc6ec5;">[</span>Header<span style="color: #bc6ec5;">](</span>header<span style="color: #bc6ec5;">)</span>, to<span style="color: #bc6ec5;">[</span>Footer<span style="color: #bc6ec5;">](</span>footer<span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+    i = <span style="color: #a45bad;">0</span>
+
+  <span style="color: #4f97d7; font-weight: bold;">let</span> <span style="color: #7590db;">shape </span>= pixels.strides<span style="color: #4f97d7;">[</span><span style="color: #a45bad;">0</span><span style="color: #4f97d7;">]</span>
+  <span style="color: #4f97d7; font-weight: bold;">var</span> <span style="color: #7590db;">pixel_data </span>= <span style="color: #4f97d7;">newSeq</span><span style="color: #4f97d7;">[</span><span style="color: #ce537a; font-weight: bold;">uint</span><span style="color: #4f97d7;">](</span>shape<span style="color: #4f97d7;">)</span>
+
+  <span style="color: #4f97d7; font-weight: bold;">for</span> v <span style="color: #4f97d7; font-weight: bold;">in</span> pixels.accessFlat<span style="color: #4f97d7;">(</span><span style="color: #ce537a; font-weight: bold;">uint8</span><span style="color: #4f97d7;">)</span>.<span style="color: #4f97d7;">items</span>:
+    pixel_data<span style="color: #4f97d7;">[</span>i<span style="color: #4f97d7;">]</span> = v
+    <span style="color: #4f97d7; font-weight: bold;">if</span> i == shape - <span style="color: #a45bad;">1</span>:
+      image.pixels.<span style="color: #4f97d7;">add</span><span style="color: #4f97d7;">(</span>newPixel<span style="color: #bc6ec5;">(</span>pixel_data<span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+      pixel_data = <span style="color: #4f97d7;">newSeq</span><span style="color: #4f97d7;">[</span><span style="color: #ce537a; font-weight: bold;">uint</span><span style="color: #4f97d7;">](</span>shape<span style="color: #4f97d7;">)</span>
+      i = -<span style="color: #a45bad;">1</span>
+    <span style="color: #4f97d7;">inc</span><span style="color: #4f97d7;">(</span>i<span style="color: #4f97d7;">)</span>
+
+  image.save<span style="color: #4f97d7;">(</span>filename, compress.<span style="color: #ce537a; font-weight: bold;">bool</span><span style="color: #4f97d7;">)</span>
+
+initPyModule<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">"_ntga"</span>, loads, saves<span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+</section>
+<section id="slide-orgebd9b34">
+<h3 id="orgebd9b34"></h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">...</span>
+<span style="color: #4f97d7; font-weight: bold;">class</span> <span style="color: #ce537a; font-weight: bold;">Image</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7;">object</span><span style="color: #4f97d7;">)</span>:
+
+    <span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">__init__</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span>, filename<span style="color: #4f97d7;">)</span>:
+        <span style="color: #7590db;">_data</span> = _ntga.loads<span style="color: #4f97d7;">(</span>filename<span style="color: #4f97d7;">)</span>
+        <span style="color: #4f97d7; font-weight: bold;">self</span>._header = json.loads<span style="color: #4f97d7;">(</span>_data<span style="color: #bc6ec5;">[</span><span style="color: #2d9574;">"header"</span><span style="color: #bc6ec5;">]</span><span style="color: #4f97d7;">)</span>
+        <span style="color: #4f97d7; font-weight: bold;">self</span>._footer = json.loads<span style="color: #4f97d7;">(</span>_data<span style="color: #bc6ec5;">[</span><span style="color: #2d9574;">"footer"</span><span style="color: #bc6ec5;">]</span><span style="color: #4f97d7;">)</span>
+        <span style="color: #4f97d7; font-weight: bold;">for</span> section <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #4f97d7;">[</span><span style="color: #4f97d7; font-weight: bold;">self</span>._header, <span style="color: #4f97d7; font-weight: bold;">self</span>._footer<span style="color: #4f97d7;">]</span>:
+            <span style="color: #4f97d7; font-weight: bold;">for</span> k, v <span style="color: #4f97d7; font-weight: bold;">in</span> section.items<span style="color: #4f97d7;">()</span>:
+                <span style="color: #4f97d7;">setattr</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span>, k, v<span style="color: #4f97d7;">)</span>
+        <span style="color: #4f97d7; font-weight: bold;">self</span>.pixels = _data<span style="color: #4f97d7;">[</span><span style="color: #2d9574;">"pixels"</span><span style="color: #4f97d7;">]</span>
+
+    <span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">save</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span>, filename, compress=<span style="color: #a45bad;">False</span><span style="color: #4f97d7;">)</span>:
+        <span style="color: #4f97d7; font-weight: bold;">for</span> section <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #4f97d7;">[</span><span style="color: #4f97d7; font-weight: bold;">self</span>._header, <span style="color: #4f97d7; font-weight: bold;">self</span>._footer<span style="color: #4f97d7;">]</span>:
+            <span style="color: #4f97d7; font-weight: bold;">for</span> k <span style="color: #4f97d7; font-weight: bold;">in</span> section:
+                <span style="color: #7590db;">section</span><span style="color: #4f97d7;">[</span>k<span style="color: #4f97d7;">]</span> = <span style="color: #4f97d7;">getattr</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span>, k<span style="color: #4f97d7;">)</span>
+        _ntga.saves<span style="color: #4f97d7;">(</span>json.dumps<span style="color: #bc6ec5;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span>._header<span style="color: #bc6ec5;">)</span>, json.dumps<span style="color: #bc6ec5;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span>._footer<span style="color: #bc6ec5;">)</span>,
+                    <span style="color: #4f97d7; font-weight: bold;">self</span>.pixels, filename, <span style="color: #4f97d7;">int</span><span style="color: #bc6ec5;">(</span>compress<span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+</section>
+<section id="slide-org0a77e78">
+<h3 id="org0a77e78"></h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #ce537a; font-weight: bold;">@property</span>
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">pixel_size</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span><span style="color: #4f97d7;">)</span>:
+    <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7; font-weight: bold;">self</span>._header<span style="color: #4f97d7;">[</span><span style="color: #2d9574;">'image_type'</span><span style="color: #4f97d7;">]</span> <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #4f97d7;">[</span><span style="color: #a45bad;">3</span>, <span style="color: #a45bad;">11</span><span style="color: #4f97d7;">]</span>:
+        <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #a45bad;">1</span>
+    <span style="color: #4f97d7; font-weight: bold;">elif</span> <span style="color: #4f97d7; font-weight: bold;">self</span>._header<span style="color: #4f97d7;">[</span><span style="color: #2d9574;">'image_type'</span><span style="color: #4f97d7;">]</span> <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #4f97d7;">[</span><span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">10</span><span style="color: #4f97d7;">]</span>:
+        <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7; font-weight: bold;">self</span>._header<span style="color: #4f97d7;">[</span><span style="color: #2d9574;">'pixel_depth'</span><span style="color: #4f97d7;">]</span> == <span style="color: #a45bad;">16</span> <span style="color: #4f97d7; font-weight: bold;">or</span> <span style="color: #4f97d7; font-weight: bold;">self</span>._header<span style="color: #4f97d7;">[</span><span style="color: #2d9574;">'pixel_depth'</span><span style="color: #4f97d7;">]</span> == <span style="color: #a45bad;">24</span>:
+            <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #a45bad;">3</span>
+        <span style="color: #4f97d7; font-weight: bold;">elif</span> <span style="color: #4f97d7; font-weight: bold;">self</span>._header<span style="color: #4f97d7;">[</span><span style="color: #2d9574;">'pixel_depth'</span><span style="color: #4f97d7;">]</span> == <span style="color: #a45bad;">32</span>:
+            <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #a45bad;">4</span>
+        <span style="color: #4f97d7; font-weight: bold;">else</span>:
+            <span style="color: #4f97d7; font-weight: bold;">raise</span> <span style="color: #ce537a; font-weight: bold;">ValueError</span><span style="color: #4f97d7;">(</span><span style="color: #2d9574;">"Invalid pixel depth"</span><span style="color: #4f97d7;">)</span>
+    <span style="color: #4f97d7; font-weight: bold;">else</span>:
+        <span style="color: #4f97d7; font-weight: bold;">raise</span> <span style="color: #ce537a; font-weight: bold;">ValueError</span><span style="color: #4f97d7;">(</span><span style="color: #2d9574;">"Invalid pixel depth"</span><span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+</section>
+<section id="slide-org59f9d4e">
+<h3 id="org59f9d4e"></h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">main</span><span style="color: #4f97d7;">(</span>image_path=<span style="color: #a45bad;">None</span><span style="color: #4f97d7;">)</span>:
+    <span style="color: #7590db;">image_path</span> = image_path <span style="color: #4f97d7; font-weight: bold;">if</span> image_path <span style="color: #4f97d7; font-weight: bold;">else</span> sys.argv<span style="color: #4f97d7;">[</span><span style="color: #a45bad;">1</span><span style="color: #4f97d7;">]</span>
+    <span style="color: #7590db;">image</span> = Image<span style="color: #4f97d7;">(</span>image_path<span style="color: #4f97d7;">)</span>
+
+    <span style="color: #4f97d7; font-weight: bold;">for</span> i <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #4f97d7;">range</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">5</span><span style="color: #4f97d7;">)</span>:
+        <span style="color: #7590db;">image.pixels</span><span style="color: #4f97d7;">[</span>i<span style="color: #4f97d7;">]</span> = pixel
+
+    image.save<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">"dump.tga"</span>, compress=<span style="color: #a45bad;">True</span><span style="color: #4f97d7;">)</span>
+
+
+<span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7;">__name__</span> == <span style="color: #2d9574;">"__main__"</span>:
+    main<span style="color: #4f97d7;">()</span>
+</pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org90125d9">
+<h2 id="org90125d9">Did I get out of trouble?</h2>
+
+</section>
+</section>
+<section>
+<section id="slide-org822a9be">
+<h2 id="org822a9be">“Enough madness? Enough? And how do you measure madness? - The Joker”</h2>
+<div class="outline-text-2" id="text-org822a9be">
+</div></section>
+<section id="slide-org6158fff">
+<h3 id="org6158fff">PC specs</h3>
+<ul>
+<li>Motherboard: <b>Abit IP35</b></li>
+<li>CPU: <b>Intel(R) Xeon(R) X5460 @ 3.16GHz 4 cores</b></li>
+<li>Memory: <b>DDR2 4GiB @ 800MHz</b></li>
+<li>HDD: <b>Seagate Baracuda</b> x 2 <b>RAID0</b></li>
+
+</ul>
+</section>
+<section id="slide-org1c0d33e">
+<h3 id="org1c0d33e"></h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #4f97d7; font-weight: bold;">import</span> os
+<span style="color: #4f97d7; font-weight: bold;">from</span> subprocess <span style="color: #4f97d7; font-weight: bold;">import</span> call
+
+<span style="color: #7590db;">BASE_PATH</span> = os.path.join<span style="color: #4f97d7;">(</span>os.getcwd<span style="color: #bc6ec5;">()</span>, <span style="color: #2d9574;">'images'</span><span style="color: #4f97d7;">)</span>
+
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">st_time</span><span style="color: #4f97d7;">(</span>func<span style="color: #4f97d7;">)</span>:
+    <span style="color: #4f97d7; font-weight: bold;">from</span> functools <span style="color: #4f97d7; font-weight: bold;">import</span> wraps
+    <span style="color: #4f97d7; font-weight: bold;">import</span> time
+
+    <span style="color: #ce537a; font-weight: bold;">@wraps</span><span style="color: #4f97d7;">(</span>func<span style="color: #4f97d7;">)</span>
+    <span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">st_func</span><span style="color: #4f97d7;">(</span>*args, **kwargs<span style="color: #4f97d7;">)</span>:
+        <span style="color: #7590db;">t1</span> = time.time<span style="color: #4f97d7;">()</span>
+        func<span style="color: #4f97d7;">(</span>*args, **kwargs<span style="color: #4f97d7;">)</span>
+        <span style="color: #7590db;">t2</span> = time.time<span style="color: #4f97d7;">()</span>
+        <span style="color: #4f97d7; font-weight: bold;">return</span> t2 - t1
+
+    <span style="color: #4f97d7; font-weight: bold;">return</span> st_func
+
+<span style="color: #ce537a; font-weight: bold;">@st_time</span>
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">cpython</span><span style="color: #4f97d7;">(</span>image_path<span style="color: #4f97d7;">)</span>:
+    <span style="color: #4f97d7; font-weight: bold;">from</span> pyTGA.measure <span style="color: #4f97d7; font-weight: bold;">import</span> main
+    <span style="color: #4f97d7; font-weight: bold;">return</span> main<span style="color: #4f97d7;">(</span>image_path<span style="color: #4f97d7;">)</span>
+
+<span style="color: #ce537a; font-weight: bold;">@st_time</span>
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">pypy</span><span style="color: #4f97d7;">(</span>image_path<span style="color: #4f97d7;">)</span>:
+    <span style="color: #4f97d7; font-weight: bold;">return</span> call<span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">[</span><span style="color: #2d9574;">"pypy"</span>, <span style="color: #2d9574;">"pyTGA/measure.py"</span>, image_path<span style="color: #bc6ec5;">]</span><span style="color: #4f97d7;">)</span>
+<span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">...</span>
+</pre>
+</div>
+</section>
+<section id="slide-org95a4839">
+<h3 id="org95a4839"></h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">start the x axis at 0</span>
+<span style="color: #7590db;">x</span> = <span style="color: #4f97d7;">[</span><span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">15</span>, <span style="color: #a45bad;">150</span>, <span style="color: #a45bad;">512</span>, <span style="color: #a45bad;">1024</span>, <span style="color: #a45bad;">2048</span>, <span style="color: #a45bad;">4096</span><span style="color: #4f97d7;">]</span>
+<span style="color: #7590db;">tests</span> = <span style="color: #4f97d7;">[</span>cpython, pypy, nuitka, nim, pymod_nim<span style="color: #4f97d7;">]</span>
+<span style="color: #7590db;">images</span> = <span style="color: #4f97d7;">[</span><span style="color: #2d9574;">"pie_15_11.tga"</span>, <span style="color: #2d9574;">"pie_150_113.tga"</span>,
+          <span style="color: #2d9574;">"pie_512_384.tga"</span>, <span style="color: #2d9574;">"pie_1024_768.tga"</span>,
+          <span style="color: #2d9574;">"pie_2048_1536.tga"</span>, <span style="color: #2d9574;">"pie_4096_3072.tga"</span><span style="color: #4f97d7;">]</span>
+
+<span style="color: #4f97d7; font-weight: bold;">for</span> t <span style="color: #4f97d7; font-weight: bold;">in</span> tests:
+    <span style="color: #7590db;">res</span> = <span style="color: #4f97d7;">[</span><span style="color: #a45bad;">0</span>, <span style="color: #4f97d7;">]</span>    <span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">0 because we want to start from the same point on both axis</span>
+    <span style="color: #4f97d7; font-weight: bold;">for</span> image <span style="color: #4f97d7; font-weight: bold;">in</span> images:
+        <span style="color: #7590db;">image_path</span> = os.path.join<span style="color: #4f97d7;">(</span>BASE_PATH, image<span style="color: #4f97d7;">)</span>
+        <span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">res will be ploted with matplotlib</span>
+        res.append<span style="color: #4f97d7;">(</span>t<span style="color: #bc6ec5;">(</span>image_path<span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+        <span style="color: #4f97d7; font-weight: bold;">print</span> <span style="color: #2d9574;">"benchmarking: {} with size: {}"</span>.<span style="color: #4f97d7;">format</span><span style="color: #4f97d7;">(</span>t.<span style="color: #4f97d7;">__name__</span>, image<span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+</section>
+<section id="slide-org7b6dd56">
+<h3 id="org7b6dd56">Results</h3>
+
+<div class="figure">
+<p><img src="./benchmark.png" alt="benchmark.png" />
+</p>
+</div>
+</section>
+<section id="slide-orgd5aa3f8">
+<h3 id="orgd5aa3f8">Detail view on the fastest three</h3>
+
+<div class="figure">
+<p><img src="./benchmark_top_3.png" alt="benchmark_top_3.png" />
+</p>
+</div>
+</section>
+<section id="slide-orgd1e2d5b">
+<h3 id="orgd1e2d5b">Detail view on small execution time</h3>
+
+<div class="figure">
+<p><img src="./benchmark_small_images.png" alt="benchmark_small_images.png" />
+</p>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org0cb0f75">
+<h2 id="org0cb0f75">Hello, is it Nim you're looking for?</h2>
+
+</section>
+</section>
+<section>
+<section id="slide-org9c852dd">
+<h2 id="org9c852dd">“True love is finding someone whose demons play well with yours” ― The Joker Batman Arkham City</h2>
+
+</section>
+</section>
+<section>
+<section id="slide-orgbca8ebf">
+<h2 id="orgbca8ebf">What is Nim?</h2>
+<p>
+Original talk given by the language creator Andreas Rumpf at OSCON 2015
+</p>
+
+<ul>
+<li>new system programming language</li>
+<li>compiles to C</li>
+<li>garbage collection + manual memory management</li>
+<li>thread local garbage collection</li>
+<li>design goals: efficient, expressive, elegant</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org87b6655">
+<h2 id="org87b6655">Goals</h2>
+<ul>
+<li>as fast as C</li>
+<li>as expressive as Python</li>
+<li>as extensible as Lisp</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org917a8d3">
+<h2 id="org917a8d3">Uses of Nim</h2>
+<ul>
+<li>web development</li>
+<li>games</li>
+<li>compilers</li>
+<li>operating system development</li>
+<li>scientific computing</li>
+<li>scripting</li>
+<li>command line applications</li>
+<li>UI applications</li>
+<li>And lots more!</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgd2e8e1e">
+<h2 id="orgd2e8e1e">Nim for Python programmers</h2>
+<p>
+Similarities and differences.
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org283131c">
+<h2 id="org283131c"></h2>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides" style="font-size: 50%">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Feature</th>
+<th scope="col" class="org-left">Python</th>
+<th scope="col" class="org-left">Nim</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Execution model</td>
+<td class="org-left">Virtual Machine, JIT</td>
+<td class="org-left">Machine code via C*</td>
+</tr>
+
+<tr>
+<td class="org-left">Meta-programming</td>
+<td class="org-left">Python (decorators/metaclasses/eval)</td>
+<td class="org-left">Nim (const/when/template/macro)</td>
+</tr>
+
+<tr>
+<td class="org-left">Memory Management</td>
+<td class="org-left">Garbage-collected</td>
+<td class="org-left">Garbage-collected and manual</td>
+</tr>
+
+<tr>
+<td class="org-left">Types</td>
+<td class="org-left">Dynamic</td>
+<td class="org-left">Static</td>
+</tr>
+
+<tr>
+<td class="org-left">Dependent types</td>
+<td class="org-left">-</td>
+<td class="org-left">Partial support</td>
+</tr>
+
+<tr>
+<td class="org-left">Generics</td>
+<td class="org-left">Duck typing</td>
+<td class="org-left">Yes</td>
+</tr>
+
+<tr>
+<td class="org-left">int8/16/32/64 types</td>
+<td class="org-left">No</td>
+<td class="org-left">Yes</td>
+</tr>
+
+<tr>
+<td class="org-left">Bigints (arbitrary size)</td>
+<td class="org-left">Yes (transparently)</td>
+<td class="org-left">Yes (via nimble package)</td>
+</tr>
+
+<tr>
+<td class="org-left">Arrays</td>
+<td class="org-left">Yes</td>
+<td class="org-left">Yes</td>
+</tr>
+
+<tr>
+<td class="org-left">Bounds-checking</td>
+<td class="org-left">Yes</td>
+<td class="org-left">Yes</td>
+</tr>
+
+<tr>
+<td class="org-left">Type inference</td>
+<td class="org-left">Duck typing</td>
+<td class="org-left">Yes (extensive support)</td>
+</tr>
+
+<tr>
+<td class="org-left">Closures</td>
+<td class="org-left">Yes</td>
+<td class="org-left">Yes</td>
+</tr>
+
+<tr>
+<td class="org-left">Operator Overloading</td>
+<td class="org-left">Yes</td>
+<td class="org-left">Yes (on any type)</td>
+</tr>
+
+<tr>
+<td class="org-left">Custom Operators</td>
+<td class="org-left">No</td>
+<td class="org-left">Yes</td>
+</tr>
+
+<tr>
+<td class="org-left">Object-Oriented</td>
+<td class="org-left">Yes</td>
+<td class="org-left">Minimalistic**</td>
+</tr>
+
+<tr>
+<td class="org-left">Methods</td>
+<td class="org-left">Yes</td>
+<td class="org-left">Yes</td>
+</tr>
+
+<tr>
+<td class="org-left">Multi-Methods</td>
+<td class="org-left">No</td>
+<td class="org-left">Yes</td>
+</tr>
+
+<tr>
+<td class="org-left">Exceptions</td>
+<td class="org-left">Yes</td>
+<td class="org-left">Yes</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+\*Other backends supported and/or planned
+\** Can be achieved with macros
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org4bb9710">
+<h2 id="org4bb9710">" The real joke is your stubborn, bone deep conviction that somehow, somewhere, all of this makes sense! That's what cracks me up each time!" - Batman #681</h2>
+
+</section>
+</section>
+<section>
+<section id="slide-orgd22ac8d">
+<h2 id="orgd22ac8d">Contact</h2>
+<p>
+<b>Bonta Sergiu Vlad</b>
+</p>
+
+<p>
+Email: <code>bonta.vlad@gmail.com</code>
+</p>
+
+<p>
+WWW: <a href="https://bontavlad.github.io">https://bontavlad.github.io</a>
+</p>
+
+<p>
+QR: TODO
+</p>
+
+<p>
+Github repo: <a href="https://github.com/BontaVlad/nimtga">https://github.com/BontaVlad/nimtga</a>
+</p>
+
+<p>
+QR: TODO
+</p>
+</section>
+</section>
+</div>
+</div>
+<script src="./reveal.js/lib/js/head.min.js"></script>
+<script src="./reveal.js/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: 'c',
+rollingLinks: false,
+keyboard: true,
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: './reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: './reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: './reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: './reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: './reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>
