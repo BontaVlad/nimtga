@@ -7,9 +7,9 @@
 <style type="text/css">
 .underline { text-decoration: underline; }
 </style>
-<link rel="stylesheet" href="./reveal.js/css/reveal.css"/>
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/reveal.css"/>
 
-<link rel="stylesheet" href="./reveal.js/css/theme/moon.css" id="theme"/>
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/moon.css" id="theme"/>
 
 
 <!-- If the query includes 'print-pdf', include the PDF print sheet -->
@@ -18,7 +18,7 @@
         var link = document.createElement( 'link' );
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = './reveal.js/css/print/pdf.css';
+        link.href = 'http://cdn.jsdelivr.net/reveal.js/3.0.0/css/print/pdf.css';
         document.getElementsByTagName( 'head' )[0].appendChild( link );
     }
 </script>
@@ -28,13 +28,13 @@
 <div class="slides">
 
 <section>
-<section id="slide-orge6b11ef">
-<h2 id="orge6b11ef">To C or not to C, let Nim answer the question!</h2>
+<section id="slide-org285f258">
+<h2 id="org285f258">To C or not to C, let Nim answer the question!</h2>
 </section>
 </section>
 <section>
-<section id="slide-orgd1f5763">
-<h2 id="orgd1f5763">Table of content</h2>
+<section id="slide-org7b7592d">
+<h2 id="org7b7592d">Table of content</h2>
 <aside class="notes">
 <p>
 Python is great but slow
@@ -56,8 +56,8 @@ Talk about this is not introduction to Nim
 </section>
 </section>
 <section>
-<section id="slide-orgabe2681">
-<h2 id="orgabe2681">Me, myself and I</h2>
+<section id="slide-org98e77eb">
+<h2 id="org98e77eb">Me, myself and I</h2>
 
 <div class="figure">
 <p><img src="./joker.jpg" alt="joker.jpg" />
@@ -89,8 +89,8 @@ Everybody can contribute.
 </section>
 </section>
 <section>
-<section id="slide-org2d630b7">
-<h2 id="org2d630b7"></h2>
+<section id="slide-orgbaa3179">
+<h2 id="orgbaa3179"></h2>
 <p>
 “Do I really look like a guy with a plan? You know what I am? I'm a dog chasing cars. I wouldn't know what to do with one if I caught it! You know, I just&#x2026; <b>do</b> things.”
 </p>
@@ -101,8 +101,8 @@ Everybody can contribute.
 </section>
 </section>
 <section>
-<section id="slide-org65bbc5b">
-<h2 id="org65bbc5b">Buyers beware</h2>
+<section id="slide-org3145cc2">
+<h2 id="org3145cc2">Buyers beware</h2>
 <ul>
 <li class="fragment roll-in">I am you're average Joe programmer. No fancy big corporation, no big project, not much experience.</li>
 <li class="fragment roll-in">Every benchmark out there lies, this included.</li>
@@ -118,13 +118,13 @@ Just to spark interest in Nim, PyMod
 </section>
 </section>
 <section>
-<section id="slide-org9c4db4f">
-<h2 id="org9c4db4f">“Madness, as you know, is a lot like gravity, all it takes is a little push” - The Joker</h2>
+<section id="slide-orgeea5a3b">
+<h2 id="orgeea5a3b">“Madness, as you know, is a lot like gravity, all it takes is a little push” - The Joker</h2>
 </section>
 </section>
 <section>
-<section id="slide-org6897ac6">
-<h2 id="org6897ac6">Looking for trouble</h2>
+<section id="slide-orgf11970b">
+<h2 id="orgf11970b">Looking for trouble</h2>
 <p>
 <b>"Every Fairy Tale Needs A Good Old Fashioned Villain"</b>
 </p>
@@ -137,15 +137,15 @@ Just to spark interest in Nim, PyMod
 </section>
 </section>
 <section>
-<section id="slide-orgf5b9d56">
-<h2 id="orgf5b9d56">The villain</h2>
+<section id="slide-org8ad2b2c">
+<h2 id="org8ad2b2c">The villain</h2>
 <p>
 We have around 1000 Truevision images that we want to open, 
 fill the first 5 pixels with red color(simulate a watermark?) and finally save it.
 </p>
 </section>
-<section id="slide-orgd2809cd">
-<h3 id="orgd2809cd">Image used</h3>
+<section id="slide-orge8f2e63">
+<h3 id="orge8f2e63">Image used</h3>
 
 <div class="figure">
 <p><img src="./preview.png" alt="preview.png" style="max-width: 80%" />
@@ -155,8 +155,8 @@ fill the first 5 pixels with red color(simulate a watermark?) and finally save i
 </section>
 </section>
 <section>
-<section id="slide-org8d33404">
-<h2 id="org8d33404">Need for speed: Hot pursuit two!</h2>
+<section id="slide-org3fac57e">
+<h2 id="org3fac57e">Need for speed: Hot pursuit two!</h2>
 <p>
 It's a batch process
 </p>
@@ -178,8 +178,8 @@ Smaller images to tax JIT, bigger to help or see how scales
 </section>
 </section>
 <section>
-<section id="slide-orgdae936b">
-<h2 id="orgdae936b">Truevision image format or *.tga</h2>
+<section id="slide-org9d0c9ed">
+<h2 id="org9d0c9ed">Truevision image format or *.tga</h2>
 <p>
 Often referred to as targa: raster graphics format.
 </p>
@@ -197,8 +197,8 @@ Why tga?
 </section>
 </section>
 <section>
-<section id="slide-org377a451">
-<h2 id="org377a451">TGA structure</h2>
+<section id="slide-org0de9446">
+<h2 id="org0de9446">TGA structure</h2>
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -251,8 +251,8 @@ Pixel structure:
 </section>
 </section>
 <section>
-<section id="slide-org3eb961e">
-<h2 id="org3eb961e">RLE compression algorithm Run-length encoding (RLE)</h2>
+<section id="slide-org0c84e22">
+<h2 id="org0c84e22">RLE compression algorithm Run-length encoding (RLE)</h2>
 <p>
 lossless data compression 
 </p>
@@ -276,8 +276,8 @@ With a run-length encoding (RLE):
 </section>
 </section>
 <section>
-<section id="slide-org821e2fc">
-<h2 id="org821e2fc">Getting out of trouble</h2>
+<section id="slide-orgc708623">
+<h2 id="orgc708623">Getting out of trouble</h2>
 <p>
 Now that we know our "villain" how can we overcome it?
 </p>
@@ -291,14 +291,14 @@ Why is important to have multiple options to chose from.
 </section>
 </section>
 <section>
-<section id="slide-org13ce096">
-<h2 id="org13ce096">“If I have to have a past, then I prefer it to be multiple choice.” ― Joker from Batman: The Killing Joke</h2>
+<section id="slide-orgd1ab97d">
+<h2 id="orgd1ab97d">“If I have to have a past, then I prefer it to be multiple choice.” ― Joker from Batman: The Killing Joke</h2>
 
 </section>
 </section>
 <section>
-<section id="slide-org5f85ded">
-<h2 id="org5f85ded">Keep it simple stupid!</h2>
+<section id="slide-orge50e317">
+<h2 id="orge50e317">Keep it simple stupid!</h2>
 <p>
 Maybe we can "cheat"!
 </p>
@@ -310,8 +310,8 @@ We do not strive for the fastest implementation, we strive for "good enough" wit
 </section>
 </section>
 <section>
-<section id="slide-org5cbcb58">
-<h2 id="org5cbcb58">cPython</h2>
+<section id="slide-orgfaab63d">
+<h2 id="orgfaab63d">cPython</h2>
 <p>
 The hero we need, the hero we want(well most of the time at least)!
 </p>
@@ -325,8 +325,8 @@ Serves as blueprint for the Nim implementation
 </p>
 
 </section>
-<section id="slide-orgfdd1d52">
-<h3 id="orgfdd1d52"></h3>
+<section id="slide-orgccfef8d">
+<h3 id="orgccfef8d"></h3>
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #4f97d7; font-weight: bold;">class</span> <span style="color: #ce537a; font-weight: bold;">TGAHeader</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7;">object</span><span style="color: #4f97d7;">)</span>:
@@ -348,8 +348,8 @@ Serves as blueprint for the Nim implementation
 </div>
 
 </section>
-<section id="slide-orgd0ca07a">
-<h3 id="orgd0ca07a"></h3>
+<section id="slide-org6234457">
+<h3 id="org6234457"></h3>
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #4f97d7; font-weight: bold;">class</span> <span style="color: #ce537a; font-weight: bold;">Image</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7;">object</span><span style="color: #4f97d7;">)</span>:
@@ -382,8 +382,8 @@ Serves as blueprint for the Nim implementation
 </section>
 </section>
 <section>
-<section id="slide-orgb8db966">
-<h2 id="orgb8db966">Nuitka</h2>
+<section id="slide-org628bd5b">
+<h2 id="org628bd5b">Nuitka</h2>
 <blockquote nil>
 <p>
 Nuitka is a Python compiler.
@@ -405,8 +405,8 @@ Help also with distribution
 
 </aside>
 </section>
-<section id="slide-org8c497f0">
-<h3 id="org8c497f0"></h3>
+<section id="slide-orga6a8eef">
+<h3 id="orga6a8eef"></h3>
 <p>
 <code>nuitka --recurse-all program.py</code> and you are set. <code>recurse-all</code> option will transverse the dependencies tree and compile them to, one by one.
 </p>
@@ -414,8 +414,8 @@ Help also with distribution
 </section>
 </section>
 <section>
-<section id="slide-orgef6eb39">
-<h2 id="orgef6eb39">Numba</h2>
+<section id="slide-orgd2d6271">
+<h2 id="orgd2d6271">Numba</h2>
 <p>
 With a few annotations, array-oriented and math-heavy Python code can be made to be similar in performance to C, C++ and Fortran.
 </p>
@@ -428,8 +428,8 @@ Numba works by generating optimized machine code using the LLVM compiler.
 Compilation can run on either CPU or GPU hardware, integrates well with Python scientific software stack.
 </p>
 </section>
-<section id="slide-org8cec78a">
-<h3 id="org8cec78a"></h3>
+<section id="slide-orgd6924c1">
+<h3 id="orgd6924c1"></h3>
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">Taken directly from the project home page</span>
@@ -452,8 +452,8 @@ Compilation can run on either CPU or GPU hardware, integrates well with Python s
 </pre>
 </div>
 </section>
-<section id="slide-orge336e7a">
-<h3 id="orge336e7a">Not included in the benchmark because:</h3>
+<section id="slide-orgdc2fd8f">
+<h3 id="orgdc2fd8f">Not included in the benchmark because:</h3>
 <p>
 The following Python language features are not currently supported:
 </p>
@@ -471,16 +471,16 @@ The following Python language features are not currently supported:
 </section>
 </section>
 <section>
-<section id="slide-orga3399ab">
-<h2 id="orga3399ab">PyPy</h2>
+<section id="slide-orgb11a264">
+<h2 id="orgb11a264">PyPy</h2>
 <blockquote nil>
 <p>
 PyPy is a fast, compliant alternative implementation of the Python language (2.7.12 and 3.3.5). It has several advantages and distinct features, speed, memory usage, compatibility, stackless
 </p>
 </blockquote>
 </section>
-<section id="slide-org43636e5">
-<h3 id="org43636e5"></h3>
+<section id="slide-org6862585">
+<h3 id="org6862585"></h3>
 <p>
 Get a huge speed improvement by just replacing <code>python</code> with <code>pypy</code> 
 </p>
@@ -502,8 +502,8 @@ We will talk at the end about nim
 </section>
 </section>
 <section>
-<section id="slide-org046c941">
-<h2 id="org046c941">Nim</h2>
+<section id="slide-org4e517bc">
+<h2 id="org4e517bc">Nim</h2>
 <blockquote nil>
 <p>
 Nim (formerly known as "Nimrod") is a statically typed, imperative programming language that tries to give the programmer ultimate power without compromises on runtime efficiency. This means it focuses on compile-time mechanisms in all their various forms.
@@ -512,8 +512,8 @@ Nim (formerly known as "Nimrod") is a statically typed, imperative programming l
 </section>
 </section>
 <section>
-<section id="slide-org98eda1c">
-<h2 id="org98eda1c">Nim-pymod</h2>
+<section id="slide-orgad094b0">
+<h2 id="orgad094b0">Nim-pymod</h2>
 <ul>
 <li>Auto-generates a Python module that wraps a Nim module</li>
 <li>pymod consists of Nim bindings &amp; Python scripts to automate the generation of Python C-API extensions</li>
@@ -521,8 +521,8 @@ Nim (formerly known as "Nimrod") is a statically typed, imperative programming l
 
 </ul>
 </section>
-<section id="slide-orga926de8">
-<h3 id="orga926de8"></h3>
+<section id="slide-org2fcc7ed">
+<h3 id="org2fcc7ed"></h3>
 <div class="org-src-container">
 
 <pre  class="src src-nim"><span style="color: #2aa1ae;">## Compile this Nim module using the following command:</span>
@@ -546,8 +546,8 @@ initPyModule<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">
 </pre>
 </div>
 </section>
-<section id="slide-org744ae0e">
-<h3 id="org744ae0e"></h3>
+<section id="slide-org1f39c92">
+<h3 id="org1f39c92"></h3>
 <pre  class="example">
 &gt;&gt;&gt; import hw
 &gt;&gt;&gt; hw.greet
@@ -574,8 +574,8 @@ greet(...)
 &gt;&gt;&gt;
 </pre>
 </section>
-<section id="slide-org028c6a9">
-<h3 id="org028c6a9">Procedure parameter &amp; return types</h3>
+<section id="slide-org0823b39">
+<h3 id="org0823b39">Procedure parameter &amp; return types</h3>
 <p>
 The following Nim types are currently supported by Pymod:
 </p>
@@ -646,8 +646,8 @@ The following Nim types are currently supported by Pymod:
 </table>
 
 </section>
-<section id="slide-org7fe0409">
-<h3 id="org7fe0409">Support for the following Nim types is in development:</h3>
+<section id="slide-orge88698e">
+<h3 id="orge88698e">Support for the following Nim types is in development:</h3>
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides" style="font-size: 60%">
 
 
@@ -714,8 +714,8 @@ The following Nim types are currently supported by Pymod:
 </table>
 
 </section>
-<section id="slide-org16c6982">
-<h3 id="org16c6982">Going Commando: ditching pymod and using ctypes</h3>
+<section id="slide-org27e9d51">
+<h3 id="org27e9d51">Going Commando: ditching pymod and using ctypes</h3>
 <p>
 Original blog post here: <a href="http://akehrer.github.io/posts/connecting-nim-to-python/">http://akehrer.github.io/posts/connecting-nim-to-python/</a>
 </p>
@@ -741,8 +741,8 @@ Original blog post here: <a href="http://akehrer.github.io/posts/connecting-nim-
 </div>
 
 </section>
-<section id="slide-orgc2762e4">
-<h3 id="orgc2762e4">Python Code</h3>
+<section id="slide-org9734ec0">
+<h3 id="org9734ec0">Python Code</h3>
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #4f97d7; font-weight: bold;">from</span> ctypes <span style="color: #4f97d7; font-weight: bold;">import</span> *
@@ -771,16 +771,16 @@ Original blog post here: <a href="http://akehrer.github.io/posts/connecting-nim-
 </div>
 
 </section>
-<section id="slide-orgf63fbb8">
-<h3 id="orgf63fbb8">Compile and run</h3>
+<section id="slide-org77009a7">
+<h3 id="org77009a7">Compile and run</h3>
 <pre  class="example">
 $nim c -d:release --app:lib median_test.nim
 $python median.py
 The median of [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0] is: 4.500000
 </pre>
 </section>
-<section id="slide-orga4ec353">
-<h3 id="orga4ec353">How do we know the arguments type?</h3>
+<section id="slide-orga33d9ab">
+<h3 id="orga33d9ab">How do we know the arguments type?</h3>
 <div class="org-src-container">
 
 <pre  class="src src-sh">nim c --app:lib --header median_test.nim
@@ -806,8 +806,8 @@ N_NIMCALL<span style="color: #4f97d7;">(</span>NI, getRefcount<span style="color
 </div>
 
 </section>
-<section id="slide-org97ba960">
-<h3 id="org97ba960">PyMod -&gt; NimTga implementation</h3>
+<section id="slide-org07497a4">
+<h3 id="org07497a4">PyMod -&gt; NimTga implementation</h3>
 <div class="org-src-container">
 
 <pre  class="src src-nim"><span style="color: #2aa1ae; background-color: #292e34;"># ...</span>
@@ -829,8 +829,8 @@ N_NIMCALL<span style="color: #4f97d7;">(</span>NI, getRefcount<span style="color
 </div>
 
 </section>
-<section id="slide-org1737467">
-<h3 id="org1737467"></h3>
+<section id="slide-org5bdca82">
+<h3 id="org5bdca82"></h3>
 <div class="org-src-container">
 
 <pre  class="src src-nim"><span style="color: #4f97d7; font-weight: bold;">proc</span><span style="color: #bc6ec5; font-weight: bold; font-style: italic;"> saves*</span><span style="color: #4f97d7;">(</span>header, footer: <span style="color: #ce537a; font-weight: bold;">string</span>, pixels: <span style="color: #4f97d7; font-weight: bold;">ptr </span><span style="color: #ce537a; font-weight: bold;">PyArrayObject</span>, filename: <span style="color: #ce537a; font-weight: bold;">string</span>, compress: <span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7;">{</span>.discardable, exportpy.<span style="color: #4f97d7;">}</span>=
@@ -856,8 +856,8 @@ initPyModule<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">
 </div>
 
 </section>
-<section id="slide-orgebd9b34">
-<h3 id="orgebd9b34"></h3>
+<section id="slide-orgb14dfd5">
+<h3 id="orgb14dfd5"></h3>
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">...</span>
@@ -882,8 +882,8 @@ initPyModule<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">
 </div>
 
 </section>
-<section id="slide-org0a77e78">
-<h3 id="org0a77e78"></h3>
+<section id="slide-orge8b9bf4">
+<h3 id="orge8b9bf4"></h3>
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #ce537a; font-weight: bold;">@property</span>
@@ -903,8 +903,8 @@ initPyModule<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">
 </div>
 
 </section>
-<section id="slide-org59f9d4e">
-<h3 id="org59f9d4e"></h3>
+<section id="slide-orgac7246e">
+<h3 id="orgac7246e"></h3>
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">main</span><span style="color: #4f97d7;">(</span>image_path=<span style="color: #a45bad;">None</span><span style="color: #4f97d7;">)</span>:
@@ -925,18 +925,18 @@ initPyModule<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">
 </section>
 </section>
 <section>
-<section id="slide-org90125d9">
-<h2 id="org90125d9">Did I get out of trouble?</h2>
+<section id="slide-orgadf079f">
+<h2 id="orgadf079f">Did I get out of trouble?</h2>
 
 </section>
 </section>
 <section>
-<section id="slide-org822a9be">
-<h2 id="org822a9be">“Enough madness? Enough? And how do you measure madness? - The Joker”</h2>
-<div class="outline-text-2" id="text-org822a9be">
+<section id="slide-org29ad911">
+<h2 id="org29ad911">“Enough madness? Enough? And how do you measure madness? - The Joker”</h2>
+<div class="outline-text-2" id="text-org29ad911">
 </div></section>
-<section id="slide-org6158fff">
-<h3 id="org6158fff">PC specs</h3>
+<section id="slide-org12b6780">
+<h3 id="org12b6780">PC specs</h3>
 <ul>
 <li>Motherboard: <b>Abit IP35</b></li>
 <li>CPU: <b>Intel(R) Xeon(R) X5460 @ 3.16GHz 4 cores</b></li>
@@ -945,8 +945,8 @@ initPyModule<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">
 
 </ul>
 </section>
-<section id="slide-org1c0d33e">
-<h3 id="org1c0d33e"></h3>
+<section id="slide-orgf4bd22c">
+<h3 id="orgf4bd22c"></h3>
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #4f97d7; font-weight: bold;">import</span> os
@@ -979,8 +979,8 @@ initPyModule<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">
 </pre>
 </div>
 </section>
-<section id="slide-org95a4839">
-<h3 id="org95a4839"></h3>
+<section id="slide-orgd409576">
+<h3 id="orgd409576"></h3>
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #2aa1ae; background-color: #292e34;"># </span><span style="color: #2aa1ae; background-color: #292e34;">start the x axis at 0</span>
@@ -1000,24 +1000,24 @@ initPyModule<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">
 </pre>
 </div>
 </section>
-<section id="slide-org7b6dd56">
-<h3 id="org7b6dd56">Results</h3>
+<section id="slide-orgea9ecdf">
+<h3 id="orgea9ecdf">Results</h3>
 
 <div class="figure">
 <p><img src="./benchmark.png" alt="benchmark.png" />
 </p>
 </div>
 </section>
-<section id="slide-orgd5aa3f8">
-<h3 id="orgd5aa3f8">Detail view on the fastest three</h3>
+<section id="slide-org3443351">
+<h3 id="org3443351">Detail view on the fastest three</h3>
 
 <div class="figure">
 <p><img src="./benchmark_top_3.png" alt="benchmark_top_3.png" />
 </p>
 </div>
 </section>
-<section id="slide-orgd1e2d5b">
-<h3 id="orgd1e2d5b">Detail view on small execution time</h3>
+<section id="slide-orgb9862d5">
+<h3 id="orgb9862d5">Detail view on small execution time</h3>
 
 <div class="figure">
 <p><img src="./benchmark_small_images.png" alt="benchmark_small_images.png" />
@@ -1026,20 +1026,20 @@ initPyModule<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">
 </section>
 </section>
 <section>
-<section id="slide-org0cb0f75">
-<h2 id="org0cb0f75">Hello, is it Nim you're looking for?</h2>
+<section id="slide-orgb35dbd2">
+<h2 id="orgb35dbd2">Hello, is it Nim you're looking for?</h2>
 
 </section>
 </section>
 <section>
-<section id="slide-org9c852dd">
-<h2 id="org9c852dd">“True love is finding someone whose demons play well with yours” ― The Joker Batman Arkham City</h2>
+<section id="slide-org9da7038">
+<h2 id="org9da7038">“True love is finding someone whose demons play well with yours” ― The Joker Batman Arkham City</h2>
 
 </section>
 </section>
 <section>
-<section id="slide-orgbca8ebf">
-<h2 id="orgbca8ebf">What is Nim?</h2>
+<section id="slide-orgf8798d1">
+<h2 id="orgf8798d1">What is Nim?</h2>
 <p>
 Original talk given by the language creator Andreas Rumpf at OSCON 2015
 </p>
@@ -1055,8 +1055,8 @@ Original talk given by the language creator Andreas Rumpf at OSCON 2015
 </section>
 </section>
 <section>
-<section id="slide-org87b6655">
-<h2 id="org87b6655">Goals</h2>
+<section id="slide-org5ec8721">
+<h2 id="org5ec8721">Goals</h2>
 <ul>
 <li>as fast as C</li>
 <li>as expressive as Python</li>
@@ -1066,8 +1066,8 @@ Original talk given by the language creator Andreas Rumpf at OSCON 2015
 </section>
 </section>
 <section>
-<section id="slide-org917a8d3">
-<h2 id="org917a8d3">Uses of Nim</h2>
+<section id="slide-org1e80362">
+<h2 id="org1e80362">Uses of Nim</h2>
 <ul>
 <li>web development</li>
 <li>games</li>
@@ -1084,16 +1084,16 @@ Original talk given by the language creator Andreas Rumpf at OSCON 2015
 </section>
 </section>
 <section>
-<section id="slide-orgd2e8e1e">
-<h2 id="orgd2e8e1e">Nim for Python programmers</h2>
+<section id="slide-org6e53681">
+<h2 id="org6e53681">Nim for Python programmers</h2>
 <p>
 Similarities and differences.
 </p>
 </section>
 </section>
 <section>
-<section id="slide-org283131c">
-<h2 id="org283131c"></h2>
+<section id="slide-orge7b3307">
+<h2 id="orge7b3307"></h2>
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides" style="font-size: 50%">
 
 
@@ -1229,14 +1229,14 @@ Similarities and differences.
 </section>
 </section>
 <section>
-<section id="slide-org4bb9710">
-<h2 id="org4bb9710">" The real joke is your stubborn, bone deep conviction that somehow, somewhere, all of this makes sense! That's what cracks me up each time!" - Batman #681</h2>
+<section id="slide-orgec6220f">
+<h2 id="orgec6220f">" The real joke is your stubborn, bone deep conviction that somehow, somewhere, all of this makes sense! That's what cracks me up each time!" - Batman #681</h2>
 
 </section>
 </section>
 <section>
-<section id="slide-orgd22ac8d">
-<h2 id="orgd22ac8d">Contact</h2>
+<section id="slide-orge6f75a9">
+<h2 id="orge6f75a9">Contact</h2>
 <p>
 <b>Bonta Sergiu Vlad</b>
 </p>
@@ -1264,8 +1264,8 @@ QR: TODO
 </section>
 </div>
 </div>
-<script src="./reveal.js/lib/js/head.min.js"></script>
-<script src="./reveal.js/js/reveal.js"></script>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
 
 <script>
 // Full list of configuration options available here:
@@ -1292,11 +1292,11 @@ multiplex: {
 
 // Optional libraries used to extend on reveal.js
 dependencies: [
- { src: './reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
- { src: './reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
- { src: './reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
- { src: './reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
- { src: './reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
 });
 </script>
 </body>
